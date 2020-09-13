@@ -1,0 +1,177 @@
+// -*- mode: c -*-
+
+// (* 1024 20) => 20480
+#define INPUT_MAX 20480
+
+// --------------------------------
+
+struct ParseRetval_tag {
+  NodeList* list;
+  int size;
+};
+typedef struct ParseRetval_tag ParseRetval;
+
+ParseRetval* ParseRetval_new(void) {
+  return (ParseRetval*) malloc(sizeof(ParseRetval));
+}
+
+// --------------------------------
+
+ParseRetval* parse_array(char* rest) {
+  int pos = 1;
+  NodeList* list;
+  char[INPUT_MAX] temp;
+  ParseRetval* pr;
+  int idx;
+  char[64] temp_str;
+  int n;
+  list = NodeList_new();
+
+  while (pos <= strlen(rest)) {
+    substring(temp, rest, pos, INPUT_MAX);
+
+    if (char_eq(temp[0], '[')) {
+      pr = parse_array(temp);
+      NodeList_add_list_item(list, pr->list);
+      pos += pr->size;
+
+    } else if (char_eq(temp[0], ']')) {
+      pos++;
+      break;
+
+    } else if (match_any_char(" ,\n", temp[0])) {
+      pos++;
+
+    } else if (
+         char_eq(temp[0], '-')
+      || is_numeric(temp[0])
+    ) {
+      idx = find_non_numeric_index(temp);
+      substring(temp_str, temp, 0, idx);
+      n = s_to_i(temp_str);
+      NodeList_add_int_item(list, n);
+      pos += strlen(temp_str);
+
+    } else if (char_eq(temp[0], '"')) {
+      idx = find_index(temp, '"', 1);
+      substring(temp_str, temp, 1, idx);
+      NodeList_add_str_item(list, temp_str);
+      pos += strlen(temp_str) + 2;
+
+    } else if (temp[0] == '\0') {
+      break;
+
+    } else {
+      fprintf(stderr, "temp[0] (%c)\n", temp[0]);
+      must_not_happen("Unexpected token", __FILE__, __LINE__);
+    }
+  }
+
+  pr = ParseRetval_new();
+  pr->list = list;
+  pr->size = pos;
+
+  return pr;
+}
+
+NodeList* parse_json(char* json) {
+  ParseRetval* pr;
+  if (char_eq(json[0], '[')) {
+    pr = parse_array(json);
+    return pr->list;
+  } else {
+    fprintf(stderr, "Unexpected token\n");
+    exit(1);
+  }
+}
+
+void print_indent(int lv) {
+  int i;
+
+  for (i = 0; i < lv; i++) {
+    printf("  ");
+  }
+}
+
+void _print_as_json(NodeList* list, int lv) {
+  NodeItem* item;
+  int i;
+
+  print_indent(lv);
+  printf("[\n");
+  for (i = 0; i < NodeList_len(list); i++) {
+    item = NodeList_get(list, i);
+
+    if (item->kind == NODE_INT) {
+      print_indent(lv);
+      printf("  %d", item->int_val);
+    } else if (item->kind == NODE_STR) {
+      print_indent(lv);
+      printf("  \"%s\"", item->str_val);
+    } else if (item->kind == NODE_LIST) {
+      _print_as_json(item->list, lv + 1);
+    } else {
+      must_not_happen("Invalid node kind", __FILE__, __LINE__);
+      exit(1);
+    }
+    if (i < NodeList_len(list) - 1) {
+      printf(",");
+    }
+    printf("\n");
+  }
+  if (NodeList_len(list) == 0) {
+    printf("\n");
+  }
+  print_indent(lv);
+  printf("]");
+}
+
+void print_as_json(NodeList* list) {
+  _print_as_json(list, 0);
+  printf("\n");
+}
+
+void list_to_json_line (char* dest, NodeList* list) {
+  NodeItem* item;
+  char[64] temp;
+  int i = 0;
+  int li;
+  int ci;
+
+  dest[i] = '[';
+  i++;
+
+  for (li = 0; li < NodeList_len(list); li++) {
+    item = NodeList_get(list, li);
+
+    if (1 <= li) {
+      dest[i] = ',';
+      i++;
+      dest[i] = ' ';
+      i++;
+    }
+
+    to_json_line(temp, item);
+    for (ci = 0; ci < strlen(temp); ci++) {
+      dest[i] = temp[ci];
+      i++;
+    }
+  }
+
+  dest[i] = ']';
+  i++;
+  dest[i] = '\0'; // TODO
+  i++;
+}
+
+void to_json_line(char* dest, NodeItem* item) {
+  if (item->kind == NODE_INT) {
+    sprintf(dest, "%d", item->int_val);
+  } else if (item->kind == NODE_STR) {
+    sprintf(dest, "\"%s\"", item->str_val);
+  } else if (item->kind == NODE_LIST) {
+    list_to_json_line(dest, item->list);
+  } else {
+    must_not_happen("Invalid type", __FILE__, __LINE__);
+  }
+}

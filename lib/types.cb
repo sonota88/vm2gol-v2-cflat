@@ -1,0 +1,372 @@
+// -*- mode: c -*-
+
+char* NodeKind_to_s(NodeKind kind) {
+  if (kind == NODE_INT) {
+    return "INT";
+  } else if (kind == NODE_STR) {
+    return "STR";
+  } else if (kind == NODE_LIST) {
+    return "LIST";
+  } else {
+    must_not_happen("Invalid NodeKind", __FILE__, __LINE__);
+    exit(1);
+  }
+}
+
+NodeItem* NodeItem_new(NodeKind kind) {
+  NodeItem* self = (NodeItem*) malloc(sizeof(NodeItem));
+  self->kind = kind;
+  return self;
+}
+
+NodeItem* NodeItem_new_int(int n) {
+  NodeItem* self = NodeItem_new(NODE_INT);
+  NodeItem_set_int_val(self, n);
+  return self;
+}
+
+NodeItem* NodeItem_new_str(char* str) {
+  NodeItem* self = NodeItem_new(NODE_STR);
+  NodeItem_set_str_val(self, str);
+  return self;
+}
+
+NodeItem* NodeItem_new_list(NodeList* list) {
+  NodeItem* self = NodeItem_new(NODE_LIST);
+  NodeItem_set_list(self, list);
+  return self;
+}
+
+void NodeItem_kind_to_str(NodeItem* self, char* dest) {
+  if (self->kind == NODE_INT) {
+    strcpy(dest, "INT");
+  } else if (self->kind == NODE_STR) {
+    strcpy(dest, "STR");
+  } else if (self->kind == NODE_LIST) {
+    strcpy(dest, "LIST");
+  } else {
+    must_not_happen("Invalid NodeKind", __FILE__, __LINE__);
+  }
+}
+
+void NodeItem_set_str_val(NodeItem* self, char* str) {
+  strcpy(self->str_val, str);
+}
+
+void NodeItem_set_int_val(NodeItem* self, int n) {
+  self->int_val = n;
+}
+
+void NodeItem_set_list(NodeItem* self, NodeList* list) {
+  self->list = list;
+}
+
+int NodeItem_str_eq(NodeItem* self, char* str) {
+  if (self->kind != NODE_STR) {
+    fprintf(stderr,
+            "Invalid type: must be NODE_STR (%s)",
+            NodeKind_to_s(self->kind)
+            );
+    exit(1);
+  }
+
+  return str_eq(self->str_val, str);
+}
+
+void NodeItem_dump(NodeItem* self) {
+  char[8] kind;
+  NodeItem_kind_to_str(self, kind);
+
+  fprintf(stderr, "  +---- dump item ----\n");
+  fprintf(stderr, "  | kind: %d\n", self->kind);
+  fprintf(stderr, "  | kind: %s\n", kind);
+
+  if (self->kind == NODE_INT) {
+    fprintf(stderr, "  | int: %d\n", self->int_val);
+  } else if (self->kind == NODE_STR) {
+    fprintf(stderr, "  | str: <%s>\n", self->str_val);
+  } else if (self->kind == NODE_LIST) {
+    fprintf(stderr, "  | list: %p\n", self->list);
+  } else {
+    fprintf(stderr, "  | ?\n");
+  }
+
+  fprintf(stderr, "  +---- dump item ----\n");
+}
+
+// --------------------------------
+
+NodeList* NodeList_new(void) {
+  NodeList* self = (NodeList*) malloc(sizeof(NodeList));
+  self->len = 0;
+  return self;
+}
+
+NodeList* NodeList_empty(void) {
+  return NodeList_new();
+}
+
+int NodeList_len(NodeList* self) {
+  return self->len;
+}
+
+void NodeList_add_item(NodeList* self, NodeItem* item) {
+  int i = NodeList_len(self);
+  self->items[i] = item;
+  self->len++;
+}
+
+void NodeList_add_all(NodeList* self, NodeList* list) {
+  NodeItem* item;
+  int i;
+
+  for (i = 0; i < NodeList_len(list); i++) {
+    item = NodeList_get(list, i);
+    NodeList_add_item(self, item);
+  }
+}
+
+void NodeList_add_int_item(NodeList* self, int n) {
+  NodeItem* item = (NodeItem*) malloc(sizeof(NodeItem));
+
+  item->kind = NODE_INT;
+  NodeItem_set_int_val(item, n);
+
+  NodeList_add_item(self, item);
+}
+
+void NodeList_add_str_item(NodeList* self, char* str) {
+  NodeItem* item = (NodeItem*) malloc(sizeof(NodeItem));
+  item->kind = NODE_STR;
+  NodeItem_set_str_val(item, str);
+
+  NodeList_add_item(self, item);
+}
+
+void NodeList_add_list_item(NodeList* self, NodeList* list) {
+  NodeItem* item = NodeItem_new(NODE_LIST);
+  NodeItem_set_list(item, list);
+
+  NodeList_add_item(self, item);
+}
+
+NodeItem* NodeList_head(NodeList* self) {
+  return NodeList_get(self, 0);
+}
+
+NodeList* NodeList_rest(NodeList* self) {
+  NodeList* new_list = NodeList_new();
+  NodeItem* item;
+  int i;
+
+  for (i = 1; i < NodeList_len(self); i++) {
+    item = NodeList_get(self, i);
+    NodeList_add_item(new_list, item);
+  }
+
+  return new_list;
+}
+
+NodeItem* NodeList_get(NodeList* self, int index) {
+  return self->items[index];
+}
+
+
+void NodeList_dump(NodeList* self) {
+  NodeItem* item;
+  int i;
+
+  fprintf(stderr, "  +---- dump list ----\n");
+  fprintf(stderr, "  | p: %p\n", self);
+
+  if (self != NULL) {
+    fprintf(stderr, "  | len: %d\n", NodeList_len(self));
+
+    for (i = 0; i < NodeList_len(self); i++) {
+      item = NodeList_get(self, i);
+      fprintf(stderr, "  | (%d) (%p):", i, item);
+      if (item != NULL) {
+        fprintf(stderr, "  k(%d:%s)",
+                item->kind,
+                NodeKind_to_s(item->kind)
+                );
+        if (item->kind == NODE_INT) {
+          fprintf(stderr, " int(%d):", item->int_val);
+        } else if (item->kind == NODE_STR) {
+          fprintf(stderr, " str(%s):", item->str_val);
+        } else if (item->kind == NODE_LIST) {
+          fprintf(stderr, " len(%d):", NodeList_len(item->list));
+        }
+      }
+      fprintf(stderr, "\n");
+    }
+  }
+
+  fprintf(stderr, "  +---- dump list ----\n");
+}
+
+// --------------------------------
+
+TokenKind TokenKind_from_str(char* str) {
+  if (str_eq(str, "kw")) {
+    return TOKEN_KW;
+  } else if (str_eq(str, "sym")) {
+    return TOKEN_SYM;
+  } else if (str_eq(str, "int")) {
+    return TOKEN_INT;
+  } else if (str_eq(str, "str")) {
+    return TOKEN_STR;
+  } else if (str_eq(str, "ident")) {
+    return TOKEN_IDENT;
+  } else {
+    must_not_happen("Invalid token kind string", __FILE__, __LINE__);
+    exit(2);
+  }
+}
+
+char* TokenKind_to_str(TokenKind kind) {
+  if (kind == TOKEN_KW) {
+    return "kw";
+  } else if (kind == TOKEN_SYM) {
+    return "sym";
+  } else if (kind == TOKEN_INT) {
+    return "int";
+  } else if (kind == TOKEN_STR) {
+    return "str";
+  } else if (kind == TOKEN_IDENT) {
+    return "ident";
+  } else {
+    must_not_happen("Invalid token kind", __FILE__, __LINE__);
+    exit(2);
+  }
+}
+
+Token* Token_new(TokenKind kind, char* str) {
+  Token* self = (Token*) malloc(sizeof(Token));
+  self->kind = kind;
+  strcpy(self->str, str);
+  return self;
+}
+
+int Token_is(Token* self, TokenKind kind, char* str) {
+  if (
+       self->kind == kind
+    && str_eq(self->str, str)
+  ) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+int Token_str_eq(Token* self, char* str) {
+  if (str_eq(self->str, str)) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void Token_dump(Token* t) {
+  fprintf(stderr, "  +---- dump token ----\n");
+  fprintf(stderr, "  | kind (%d)\n", t->kind);
+  fprintf(stderr, "  | str (%s)\n", t->str);
+  fprintf(stderr, "  +---- dump token ----\n");
+}
+
+// --------------------------------
+
+Name* Name_new(char* str) {
+  Name* name = (Name*) malloc(sizeof(Name));
+  strcpy(name->str, str);
+  name->next = NULL;
+  return name;
+}
+
+// --------------------------------
+
+Names* Names_new(void) {
+  Names* names = (Names*) malloc(sizeof(Names));
+  names->head = NULL;
+  return names;
+}
+
+Names* Names_empty(void) {
+  return Names_new();
+}
+
+int Names_len(Names* self) {
+  int i = 0;
+  Name* current = self->head;
+  while (current != NULL) {
+    current = current->next;
+    i++;
+  }
+  return i;
+}
+
+void Names_add(Names* self, char* str) {
+  Name* new_name = Name_new(str);
+  if (self->head == NULL) {
+    self->head = new_name;
+  } else {
+    Name* current = self->head;
+    while (current->next != NULL) {
+      current = current->next;
+    }
+    current->next = new_name;
+  }
+}
+
+Names* Names_from_node_list(NodeList* list) {
+  Names* names = Names_new();
+  int i;
+
+  for (i = 0; i < NodeList_len(list); i++) {
+    Names_add(names, NodeList_get(list, i)->str_val);
+  }
+  return names;
+}
+
+char* Names_get(Names* self, int index) {
+  Name* current = self->head;
+  int i = 0;
+
+  while (current != NULL) {
+    if (i == index) {
+      break;
+    }
+    current = current->next;
+    i++;
+  }
+
+  return current->str;
+}
+
+int Names_index(Names* self, char* name) {
+  int i;
+
+  for (i = 0; i < Names_len(self); i++) {
+    if (str_eq(Names_get(self, i), name)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+int Names_contains(Names* self, char* name) {
+  int i = Names_index(self, name);
+  if (i >= 0) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void Names_dump(Names* self) {
+  int i;
+
+  for (i = 0; i < Names_len(self); i++) {
+    fprintf(stderr, "  name | (%d) (%s)\n", i, Names_get(self, i));
+  }
+}

@@ -1,0 +1,22 @@
+// -*- mode: c -*-
+
+import stdio;
+
+import lib.common_import;
+import lib.utils;
+import lib.types;
+import lib.json;
+
+// (* 1024 20) => 20480
+#define INPUT_SIZE 20480
+
+int main(void) {
+  char[INPUT_SIZE] input;
+  NodeList* list;
+
+  read_stdin_all(input);
+  list = parse_json(input);
+  print_as_json(list);
+
+  return 0;
+}

@@ -1,0 +1,5 @@
+// -*- mode: c -*-
+
+import stdio;
+import stdlib;
+import string;

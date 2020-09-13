@@ -1,0 +1,724 @@
+// -*- mode: c -*-
+
+import lib.common_import;
+import lib.utils;
+import lib.types;
+import lib.json;
+
+// (* 1024 20) => 20480
+#define INPUT_SIZE 20480
+#define NUM_TOKENS 1024
+
+Token*[NUM_TOKENS] g_tokens;
+int g_num_tokens;
+int g_pos = 0;
+int g_is_debug = 0;
+
+// --------------------------------
+
+void not_yet_impl(char* msg, int ln) {
+  _err_exit(msg, __FILE__, ln);
+}
+
+void parse_error(char* msg, int ln) {
+  _err_exit(msg, __FILE__, ln);
+}
+
+// --------------------------------
+
+void puts_fn(char* s) {
+  if (g_is_debug) {
+    puts_e(s);
+  }
+}
+
+int get_line_size(char* text, int pos) {
+  int i = find_index(text, '\n', pos);
+  if (0 <= i) {
+    return i - pos + 1;
+  } else {
+    return strlen(text) - pos;
+  }
+}
+
+void chomp(char* str) {
+  int i;
+
+  i = 0;
+  while (1) {
+    if (char_eq(str[i], '\0')) {
+      break;
+    }
+    if (char_eq(str[i], '\n')) {
+      str[i] = '\0';
+      break;
+    }
+    i++;
+  }
+}
+
+void read_tokens(char* input) {
+  int src_len;
+  int pos = 0;
+  int line_size;
+  char[256] line;
+  char[8] kind_str;
+  char[64] str;
+  int ti = 0;
+  int sep_i;
+
+  src_len = strlen(input);
+
+  while (pos < src_len) {
+    line_size = get_line_size(input, pos);
+    substring(line, input, pos, pos + line_size);
+
+    chomp(line);
+
+    sep_i = find_index(line, ':', 0);
+    substring(kind_str, line, 0, sep_i);
+    substring(str, line, sep_i + 1, line_size);
+
+    g_tokens[ti] = Token_new(
+      TokenKind_from_str(kind_str),
+      str
+    );
+
+    ti++;
+    if (NUM_TOKENS <= ti) {
+      _err_exit("Over NUM_TOKENS", __FILE__, __LINE__);
+    }
+
+    pos += line_size;
+  }
+
+  g_num_tokens = ti;
+}
+
+int is_end(void) {
+  if (g_num_tokens <= g_pos) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+Token* peek(int offset) {
+  return g_tokens[g_pos + offset];
+}
+
+void assert_value(TokenKind kind, char* str) {
+  Token* t = peek(0);
+
+  if (t->kind != kind) {
+    fprintf(stderr, "Assertion failed:\n");
+    fprintf(stderr, "  expected kind: (%s) \n", TokenKind_to_str(kind));
+    fprintf(stderr, "  actual: (%s) (%s) \n",
+            TokenKind_to_str(t->kind), t->str);
+    parse_error("Unexpected kind", __LINE__);
+  }
+
+  if (Token_str_eq(t, str)) {
+    // OK
+  } else {
+    fprintf(stderr, "Assertion failed:\n");
+    fprintf(stderr, "  expected str: (%s) \n", str);
+    fprintf(stderr, "  actual: (%s) (%s) \n",
+            TokenKind_to_str(t->kind), t->str);
+    parse_error("Unexpected str", __LINE__);
+  }
+}
+
+void consume_kw(char* str) {
+  assert_value(TOKEN_KW, str);
+  g_pos++;
+}
+
+void consume_sym(char* str) {
+  assert_value(TOKEN_SYM, str);
+  g_pos++;
+}
+
+// --------------------------------
+
+NodeItem* parse_arg(void) {
+  Token* t;
+  NodeItem* arg;
+
+  puts_fn("-->> parse_arg");
+
+  t = peek(0);
+
+  if (t->kind == TOKEN_INT) {
+    g_pos++;
+    arg = NodeItem_new_int(s_to_i(t->str));
+    return arg;
+
+  } else if (t->kind == TOKEN_IDENT) {
+    g_pos++;
+    arg = NodeItem_new_str(t->str);
+    return arg;
+
+  } else {
+    not_yet_impl("parse_arg", __LINE__);
+    exit(2);
+  }
+}
+
+NodeItem* parse_args_first(void) {
+  Token* t;
+
+  puts_fn("-->> parse_args_first");
+
+  t = peek(0);
+
+  if (Token_is(t, TOKEN_SYM, ")")) {
+    return NULL;
+  }
+
+  return parse_arg();
+}
+
+NodeItem* parse_args_rest(void) {
+  Token* t;
+
+  puts_fn("-->> parse_args_rest");
+
+  t = peek(0);
+
+  if (Token_is(t, TOKEN_SYM, ")")) {
+    return NULL;
+  }
+
+  consume_sym(",");
+
+  return parse_arg();
+}
+
+NodeList* parse_args(void) {
+  NodeList* args;
+  NodeItem* first_arg;
+  NodeItem* rest_arg;
+
+  puts_fn("-->> parse_args");
+
+  args = NodeList_new();
+
+  first_arg = parse_args_first();
+  if (first_arg == NULL) {
+    return args;
+  }
+  NodeList_add_item(args, first_arg);
+
+  while (1) {
+    rest_arg = parse_args_rest();
+    if (rest_arg == NULL) {
+      break;
+    }
+    NodeList_add_item(args, rest_arg);
+  }
+
+  return args;
+}
+
+NodeList* parse_func(void) {
+  NodeList* list;
+  Token* t;
+  char[64] fn_name;
+  NodeList* args;
+  NodeList* stmts;
+
+  puts_fn("-->> parse_func");
+
+  consume_kw("func");
+
+  t = peek(0);
+  g_pos++;
+  strcpy(fn_name, t->str);
+
+  consume_sym("(");
+  args = parse_args();
+  consume_sym(")");
+
+  consume_sym("{");
+  stmts = parse_stmts();
+  consume_sym("}");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "func");
+  NodeList_add_str_item(list, fn_name);
+  NodeList_add_list_item(list, args);
+  NodeList_add_list_item(list, stmts);
+
+  return list;
+}
+
+NodeList* parse_var_declare(void) {
+  NodeList* list;
+  char[64] var_name;
+  Token* t;
+
+  puts_fn("-->> parse_var_declare");
+
+  t = peek(0);
+  g_pos++;
+  strcpy(var_name, t->str);
+
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "var");
+  NodeList_add_str_item(list, var_name);
+  return list;
+}
+
+NodeList* parse_var_init(void) {
+  NodeList* list;
+  char[64] var_name;
+  Token* t;
+  NodeItem* expr;
+
+  puts_fn("-->> parse_var_init");
+
+  t = peek(0);
+  g_pos++;
+  strcpy(var_name, t->str);
+
+  consume_sym("=");
+
+  expr = parse_expr();
+
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "var");
+  NodeList_add_str_item(list, var_name);
+  NodeList_add_item(list, expr);
+  return list;
+}
+
+NodeList* parse_var(void) {
+  Token* t;
+
+  consume_kw("var");
+
+  t = peek(1);
+
+  if (Token_str_eq(t, ";")) {
+    return parse_var_declare();
+  } else if (Token_str_eq(t, "=")) {
+    return parse_var_init();
+  } else {
+    parse_error("Unexpected token", __LINE__);
+    exit(2);
+  }
+}
+
+NodeItem* parse_expr_right(NodeItem* expr_l) {
+  Token* t;
+  NodeList* expr_els;
+  NodeItem* expr_r;
+
+  t = peek(0);
+
+  if (
+      Token_is(t, TOKEN_SYM, ";") ||
+      Token_is(t, TOKEN_SYM, ")")
+  ) {
+    return expr_l;
+  }
+
+  if (Token_is(t, TOKEN_SYM, "+")) {
+    consume_sym("+");
+    expr_r = parse_expr();
+    expr_els = NodeList_new();
+    NodeList_add_str_item(expr_els, "+");
+    NodeList_add_item(expr_els, expr_l);
+    NodeList_add_item(expr_els, expr_r);
+
+  } else if (Token_is(t, TOKEN_SYM, "*")) {
+    consume_sym("*");
+    expr_r = parse_expr();
+    expr_els = NodeList_new();
+    NodeList_add_str_item(expr_els, "*");
+    NodeList_add_item(expr_els, expr_l);
+    NodeList_add_item(expr_els, expr_r);
+
+  } else if (Token_is(t, TOKEN_SYM, "==")) {
+    consume_sym("==");
+    expr_r = parse_expr();
+    expr_els = NodeList_new();
+    NodeList_add_str_item(expr_els, "eq");
+    NodeList_add_item(expr_els, expr_l);
+    NodeList_add_item(expr_els, expr_r);
+
+  } else if (Token_is(t, TOKEN_SYM, "!=")) {
+    consume_sym("!=");
+    expr_r = parse_expr();
+    expr_els = NodeList_new();
+    NodeList_add_str_item(expr_els, "neq");
+    NodeList_add_item(expr_els, expr_l);
+    NodeList_add_item(expr_els, expr_r);
+
+  } else {
+    not_yet_impl("Unsupported operator", __LINE__);
+  }
+
+  return NodeItem_new_list(expr_els);
+}
+
+NodeItem* parse_expr(void) {
+  Token* tl;
+  NodeItem* expr_l;
+  int n;
+
+  puts_fn("-->> parse_expr");
+
+  tl = peek(0);
+
+  if (Token_is(tl, TOKEN_SYM, "(")) {
+    consume_sym("(");
+    expr_l = parse_expr();
+    consume_sym(")");
+
+    return parse_expr_right(expr_l);
+  }
+
+  if (tl->kind == TOKEN_INT) {
+    g_pos++;
+    n = s_to_i(tl->str);
+
+    expr_l = NodeItem_new_int(n);
+
+    return parse_expr_right(expr_l);
+
+  } else if (tl->kind == TOKEN_IDENT) {
+    g_pos++;
+
+    expr_l = NodeItem_new_str(tl->str);
+
+    return parse_expr_right(expr_l);
+
+  } else {
+
+    puts_e(TokenKind_to_str(tl->kind));
+    parse_error("Unexpected token kind", __LINE__);
+    exit(2);
+  }
+}
+
+NodeList* parse_set(void) {
+  char[64] var_name;
+  Token* t;
+  NodeItem* expr;
+  NodeList* list;
+
+  puts_fn("-->> parse_set");
+
+  consume_kw("set");
+
+  t = peek(0);
+  g_pos++;
+  strcpy(var_name, t->str);
+
+  consume_sym("=");
+
+  expr = parse_expr();
+
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "set");
+  NodeList_add_str_item(list, var_name);
+  NodeList_add_item(list, expr);
+  return list;
+}
+
+NodeList* parse_funcall(void) {
+  NodeList* list;
+  Token* t;
+  char* fn_name;
+  NodeList* args;
+
+  puts_fn("-->> parse_funcall");
+
+  list = NodeList_new();
+
+  t = peek(0);
+  g_pos++;
+  fn_name = t->str;
+
+  consume_sym("(");
+  args = parse_args();
+  consume_sym(")");
+
+  NodeList_add_str_item(list, fn_name);
+  NodeList_add_all(list, args);
+  return list;
+}
+
+NodeList* parse_call(void) {
+  NodeList* list;
+  NodeList* funcall;
+
+  puts_fn("-->> parse_call");
+
+  consume_kw("call");
+
+  funcall = parse_funcall();
+
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "call");
+  NodeList_add_all(list, funcall);
+  return list;
+}
+
+NodeList* parse_call_set(void) {
+  NodeList* list;
+  Token* t;
+  char[64] var_name;
+  NodeList* funcall;
+
+  consume_kw("call_set");
+
+  t = peek(0);
+  g_pos++;
+  strcpy(var_name, t->str);
+
+  consume_sym("=");
+
+  funcall = parse_funcall();
+
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "call_set");
+  NodeList_add_str_item(list, var_name);
+  NodeList_add_list_item(list, funcall);
+  return list;
+}
+
+NodeList* parse_return(void) {
+  NodeList* list;
+  NodeItem* expr;
+
+  consume_kw("return");
+
+  expr = parse_expr();
+
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "return");
+  NodeList_add_item(list, expr);
+  return list;
+}
+
+NodeList* parse_while(void) {
+  NodeList* list;
+  NodeItem* expr;
+  NodeList* stmts;
+
+  consume_kw("while");
+
+  consume_sym("(");
+  expr = parse_expr();
+  consume_sym(")");
+
+  consume_sym("{");
+  stmts = parse_stmts();
+  consume_sym("}");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "while");
+  NodeList_add_item(list, expr);
+  NodeList_add_list_item(list, stmts);
+  return list;
+}
+
+NodeList* parse_when_clause(void) {
+  NodeList* list;
+  Token* t;
+  NodeItem* expr;
+  NodeList* stmts;
+
+  t = peek(0);
+  if (Token_is(t, TOKEN_SYM, "}")) {
+    return NULL;
+  }
+
+  consume_sym("(");
+  expr = parse_expr();
+  consume_sym(")");
+
+  consume_sym("{");
+  stmts = parse_stmts();
+  consume_sym("}");
+
+  list = NodeList_new();
+  NodeList_add_item(list, expr);
+  NodeList_add_all(list, stmts);
+  return list;
+}
+
+NodeList* parse_case(void) {
+  NodeList* list;
+  NodeList* when_clauses;
+  NodeList* when_clause;
+
+  consume_kw("case");
+
+  consume_sym("{");
+
+  when_clauses = NodeList_new();
+
+  while (1) {
+    when_clause = parse_when_clause();
+    if (when_clause == NULL) {
+      break;
+    }
+
+    NodeList_add_list_item(when_clauses, when_clause);
+  }
+
+  consume_sym("}");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "case");
+  NodeList_add_all(list, when_clauses);
+  return list;
+}
+
+NodeList* parse_vm_comment(void) {
+  NodeList* list;
+  char* comment;
+  Token* t;
+
+  consume_kw("_cmt");
+  consume_sym("(");
+
+  t = peek(0);
+  g_pos++;
+  comment = t->str;
+
+  consume_sym(")");
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "_cmt");
+  NodeList_add_str_item(list, comment);
+  return list;
+}
+
+NodeList* parse_stmt(void) {
+  Token* t = peek(0);
+
+  puts_fn("-->> parse_stmt");
+
+  if (Token_is(t, TOKEN_SYM, "}")) {
+    return NULL;
+  }
+
+  if (Token_str_eq(t, "func")) {
+    return parse_func();
+  } else if (Token_str_eq(t, "var")) {
+    return parse_var();
+  } else if (Token_str_eq(t, "set")) {
+    return parse_set();
+  } else if (Token_str_eq(t, "call")) {
+    return parse_call();
+  } else if (Token_str_eq(t, "call_set")) {
+    return parse_call_set();
+  } else if (Token_str_eq(t, "return")) {
+    return parse_return();
+  } else if (Token_str_eq(t, "while")) {
+    return parse_while();
+  } else if (Token_str_eq(t, "case")) {
+    return parse_case();
+  } else if (Token_str_eq(t, "_cmt")) {
+    return parse_vm_comment();
+  } else {
+    Token_dump(t);
+    not_yet_impl("parse_stmt", __LINE__);
+    exit(1);
+  }
+}
+
+NodeList* parse_stmts(void) {
+  NodeList* stmts;
+
+  puts_fn("-->> parse_stmts");
+
+  stmts = NodeList_new();
+
+  while (1) {
+    NodeList* stmt;
+    NodeItem* list_wrapper;
+
+    if (is_end()) {
+      break;
+    }
+
+    stmt = parse_stmt();
+    if (stmt == NULL) {
+      break;
+    }
+
+    list_wrapper = NodeItem_new(NODE_LIST);
+    list_wrapper->list = stmt;
+    NodeList_add_item(stmts, list_wrapper);
+  }
+
+  return stmts;
+}
+
+NodeItem* parse(void) {
+  NodeItem* list_wrapper;
+  NodeList* list;
+  NodeList* stmts;
+  int i;
+
+  stmts = parse_stmts();
+
+  list = NodeList_new();
+  NodeList_add_str_item(list, "stmts");
+  for (i = 0; i < NodeList_len(stmts); i++) {
+    NodeList_add_item(list, stmts->items[i]);
+  }
+
+  list_wrapper = NodeItem_new(NODE_LIST);
+  list_wrapper->list = list;
+  return list_wrapper;
+}
+
+int main(void) {
+  char[INPUT_SIZE] input;
+  NodeItem* tree;
+  Token* t;
+  int i;
+
+  read_stdin_all(input);
+
+  read_tokens(input);
+
+  if (0) {
+    for (i = 0; i < g_num_tokens; i++) {
+      t = g_tokens[i];
+      fprintf(
+        stderr,
+        "  kind(%s) str<%s>\n",
+        TokenKind_to_str(t->kind),
+        t->str
+      );
+      Token_dump(t);
+    }
+  }
+
+  tree = parse();
+
+  print_as_json(tree->list);
+
+  return 0;
+}
