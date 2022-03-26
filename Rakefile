@@ -4,9 +4,9 @@ CC = "./cbc.sh"
 
 TEMP_DIR = "z_tmp"
 
-SRC_UTILS     = "lib/utils.cb"
-SRC_TYPES     = "lib/types.cb"
-SRC_JSON      = "lib/json.cb"
+SRC_UTILS = "lib/utils.cb"
+SRC_TYPES = "lib/types.cb"
+SRC_JSON  = "lib/json.cb"
 
 BINS = [
   "bin/test_json",
