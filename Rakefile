@@ -21,9 +21,11 @@ end
 
 def compile(t)
   main_file = t.prerequisites[0]
-  preprocessed = temp_path("pp_" + File.basename(main_file))
-  sh %(ruby preproc.rb #{main_file} > #{preprocessed})
-  sh %(#{CC} #{preprocessed} -o #{t.name})
+  preprocessed = "pp_" + File.basename(main_file)
+  sh %(ruby preproc.rb #{main_file} > #{TEMP_DIR}/#{preprocessed})
+  cd TEMP_DIR do
+    sh %(#{CC} #{preprocessed} -o ../#{t.name})
+  end
 end
 
 # --------------------------------
@@ -36,7 +38,6 @@ task :clean do
   BINS.each{ |bin_path|
     sh "rm -f #{bin_path}"
   }
-  sh "rm -f *.o *.s"
   sh "rm -f z_tmp/*"
 end
 
