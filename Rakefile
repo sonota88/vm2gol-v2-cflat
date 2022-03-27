@@ -23,9 +23,13 @@ def compile(t)
   main_file = t.prerequisites[0]
   preprocessed = "pp_" + File.basename(main_file)
   sh %(ruby preproc.rb #{main_file} > #{TEMP_DIR}/#{preprocessed})
+
+  bin_bname = File.basename(t.name)
   cd TEMP_DIR do
-    sh %(#{CC} #{preprocessed} -o ../#{t.name})
+    sh %(#{CC} #{preprocessed} -o #{bin_bname})
   end
+
+  sh %(mv #{TEMP_DIR}/#{bin_bname} #{t.name})
 end
 
 # --------------------------------

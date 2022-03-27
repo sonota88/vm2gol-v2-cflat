@@ -1,5 +1,12 @@
 #!/bin/bash
 
-CBC_INSTALL_DIR=/path/to/cbc_installation_dir
+print_this_dir() {
+  (
+    cd "$(dirname "$0")"
+    pwd
+  )
+}
 
-${CBC_INSTALL_DIR}/bin/cbc "$@"
+readonly __DIR__="$(print_this_dir)"
+
+${__DIR__}/docker_run.sh cbc "$@"
