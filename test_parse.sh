@@ -59,7 +59,7 @@ test_nn() {
 mkdir -p z_tmp
 
 if [ "$BUILD_DONE" != "1" ]; then
-  rake clean build 1>&2
+  rake build 1>&2
   if [ $? -ne 0 ]; then
     echo "Compilation failed" >&2
     exit 1

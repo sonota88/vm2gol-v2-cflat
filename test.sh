@@ -11,7 +11,7 @@ print_this_dir() {
 ERRS=""
 
 test_all() {
-  rake clean build
+  rake build
   if [ $? -ne 0 ]; then
     echo "Compilation failed" >&2
     exit 1
