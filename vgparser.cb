@@ -693,13 +693,41 @@ NodeList* parse_stmts(void) {
   return stmts;
 }
 
+NodeList* parse_top_stmts(void) {
+  NodeList* stmts;
+
+  puts_fn("-->> parse_top_stmts");
+
+  stmts = NodeList_new();
+
+  while (1) {
+    NodeList* stmt;
+    NodeItem* list_wrapper;
+
+    if (is_end()) {
+      break;
+    }
+
+    stmt = parse_stmt();
+    if (stmt == NULL) {
+      break;
+    }
+
+    list_wrapper = NodeItem_new(NODE_LIST);
+    list_wrapper->list = stmt;
+    NodeList_add_item(stmts, list_wrapper);
+  }
+
+  return stmts;
+}
+
 NodeItem* parse(void) {
   NodeItem* list_wrapper;
   NodeList* list;
   NodeList* stmts;
   int i;
 
-  stmts = parse_stmts();
+  stmts = parse_top_stmts();
 
   list = NodeList_new();
   NodeList_add_str_item(list, "stmts");
