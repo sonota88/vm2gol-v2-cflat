@@ -726,31 +726,31 @@ NodeList* parse_top_stmt(void) {
 }
 
 NodeList* parse_top_stmts(void) {
-  NodeList* stmts;
+  NodeList* top_stmts;
 
   puts_fn("-->> parse_top_stmts");
 
-  stmts = NodeList_new();
+  top_stmts = NodeList_new();
 
   while (1) {
-    NodeList* stmt;
+    NodeList* top_stmt;
     NodeItem* list_wrapper;
 
     if (is_end()) {
       break;
     }
 
-    stmt = parse_top_stmt();
-    if (stmt == NULL) {
+    top_stmt = parse_top_stmt();
+    if (top_stmt == NULL) {
       break;
     }
 
     list_wrapper = NodeItem_new(NODE_LIST);
-    list_wrapper->list = stmt;
-    NodeList_add_item(stmts, list_wrapper);
+    list_wrapper->list = top_stmt;
+    NodeList_add_item(top_stmts, list_wrapper);
   }
 
-  return stmts;
+  return top_stmts;
 }
 
 NodeItem* parse(void) {
