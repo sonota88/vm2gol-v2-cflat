@@ -638,10 +638,6 @@ NodeList* parse_stmt(void) {
 
   puts_fn("-->> parse_stmt");
 
-  if (Token_is(t, TOKEN_SYM, "}")) {
-    return NULL;
-  }
-
   if (Token_str_eq(t, "set")) {
     return parse_set();
   } else if (Token_str_eq(t, "call")) {
@@ -673,15 +669,13 @@ NodeList* parse_stmts(void) {
   while (1) {
     NodeList* stmt;
     NodeItem* list_wrapper;
+    Token* t = peek(0);
 
-    if (is_end()) {
+    if (Token_is(t, TOKEN_SYM, "}")) {
       break;
     }
 
     stmt = parse_stmt();
-    if (stmt == NULL) {
-      break;
-    }
 
     list_wrapper = NodeItem_new(NODE_LIST);
     list_wrapper->list = stmt;
