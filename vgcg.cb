@@ -400,7 +400,7 @@ void codegen_return(
   char[32] vram_ref;
 
   if (retval->kind == NODE_INT) {
-    printf("  set_reg_a %d\n", retval->int_val);
+    printf("  cp %d reg_a\n", retval->int_val);
 
   } else if (retval->kind == NODE_STR) {
     strcpy(retval_str, retval->str_val);
