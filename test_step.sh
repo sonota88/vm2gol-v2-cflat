@@ -9,7 +9,7 @@ print_project_dir() {
 }
 
 export PROJECT_DIR="$(print_project_dir)"
-export TEST_DIR="${PROJECT_DIR}/test"
+export TEST_DIR="${PROJECT_DIR}/test/compile"
 export TEMP_DIR="${PROJECT_DIR}/z_tmp"
 
 ERRS=""
