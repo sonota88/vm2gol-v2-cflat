@@ -721,8 +721,7 @@ NodeList* parse_top_stmts(void) {
   return top_stmts;
 }
 
-NodeItem* parse(void) {
-  NodeItem* list_wrapper;
+NodeList* parse(void) {
   NodeList* list;
   NodeList* top_stmts;
   int i;
@@ -735,14 +734,12 @@ NodeItem* parse(void) {
     NodeList_add_item(list, top_stmts->items[i]);
   }
 
-  list_wrapper = NodeItem_new(NODE_LIST);
-  list_wrapper->list = list;
-  return list_wrapper;
+  return list;
 }
 
 int main(void) {
   char[INPUT_SIZE] input;
-  NodeItem* tree;
+  NodeList* tree;
   Token* t;
   int i;
 
@@ -765,7 +762,7 @@ int main(void) {
 
   tree = parse();
 
-  print_as_json(tree->list);
+  print_as_json(tree);
 
   return 0;
 }
