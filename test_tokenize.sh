@@ -9,7 +9,7 @@ print_project_dir() {
 }
 
 export PROJECT_DIR="$(print_project_dir)"
-export TEST_DIR="${PROJECT_DIR}/test"
+export TEST_DIR="${PROJECT_DIR}/test/lex"
 export TEMP_DIR="${PROJECT_DIR}/z_tmp"
 
 ERRS=""
@@ -23,9 +23,9 @@ test_nn() {
 
   echo "test_${nn}"
 
-  local exp_tokens_file="${TEST_DIR}/tokenize_exp_${nn}.txt"
+  local exp_tokens_file="${TEST_DIR}/exp_${nn}.txt"
 
-  cat ${TEST_DIR}/tokenize_${nn}.vg.txt \
+  cat ${TEST_DIR}/${nn}.vg.txt \
     | bin/vgtokenizer \
     > $temp_tokens_file
   if [ $? -ne 0 ]; then
