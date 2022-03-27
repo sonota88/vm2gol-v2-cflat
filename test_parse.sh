@@ -9,7 +9,7 @@ print_project_dir() {
 }
 
 export PROJECT_DIR="$(print_project_dir)"
-export TEST_DIR="${PROJECT_DIR}/test"
+export TEST_DIR="${PROJECT_DIR}/test/parse"
 export TEMP_DIR="${PROJECT_DIR}/z_tmp"
 
 ERRS=""
@@ -25,7 +25,7 @@ test_nn() {
 
   echo "test_${nn}"
 
-  local exp_vga_file="${TEST_DIR}/parse_exp_${nn}.vgt.json"
+  local exp_vga_file="${TEST_DIR}/exp_${nn}.vgt.json"
 
   echo "  tok" >&2
   cat ${TEST_DIR}/${nn}.vg.txt | bin/vgtokenizer > $temp_tokens_file
