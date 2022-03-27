@@ -704,20 +704,6 @@ NodeList* parse_top_stmt(void) {
 
   if (Token_str_eq(t, "func")) {
     return parse_func();
-  } else if (Token_str_eq(t, "set")) {
-    return parse_set();
-  } else if (Token_str_eq(t, "call")) {
-    return parse_call();
-  } else if (Token_str_eq(t, "call_set")) {
-    return parse_call_set();
-  } else if (Token_str_eq(t, "return")) {
-    return parse_return();
-  } else if (Token_str_eq(t, "while")) {
-    return parse_while();
-  } else if (Token_str_eq(t, "case")) {
-    return parse_case();
-  } else if (Token_str_eq(t, "_cmt")) {
-    return parse_vm_comment();
   } else {
     Token_dump(t);
     not_yet_impl("parse_stmt", __LINE__);
