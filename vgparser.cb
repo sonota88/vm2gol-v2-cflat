@@ -245,7 +245,6 @@ NodeList* parse_func(void) {
   stmts = NodeList_new();
   while (1) {
     NodeList* stmt;
-    NodeItem* list_wrapper;
 
     t = peek(0);
     if (Token_str_eq(t, "}")) {
@@ -258,9 +257,7 @@ NodeList* parse_func(void) {
       stmt = parse_stmt();
     }
 
-    list_wrapper = NodeItem_new(NODE_LIST);
-    list_wrapper->list = stmt;
-    NodeList_add_item(stmts, list_wrapper);
+    NodeList_add_list_item(stmts, stmt);
   }
 
   consume_sym("}");
@@ -668,7 +665,6 @@ NodeList* parse_stmts(void) {
 
   while (1) {
     NodeList* stmt;
-    NodeItem* list_wrapper;
     Token* t = peek(0);
 
     if (Token_is(t, TOKEN_SYM, "}")) {
@@ -676,10 +672,7 @@ NodeList* parse_stmts(void) {
     }
 
     stmt = parse_stmt();
-
-    list_wrapper = NodeItem_new(NODE_LIST);
-    list_wrapper->list = stmt;
-    NodeList_add_item(stmts, list_wrapper);
+    NodeList_add_list_item(stmts, stmt);
   }
 
   return stmts;
@@ -712,7 +705,6 @@ NodeList* parse_top_stmts(void) {
 
   while (1) {
     NodeList* top_stmt;
-    NodeItem* list_wrapper;
 
     if (is_end()) {
       break;
@@ -723,9 +715,7 @@ NodeList* parse_top_stmts(void) {
       break;
     }
 
-    list_wrapper = NodeItem_new(NODE_LIST);
-    list_wrapper->list = top_stmt;
-    NodeList_add_item(top_stmts, list_wrapper);
+    NodeList_add_list_item(top_stmts, top_stmt);
   }
 
   return top_stmts;
