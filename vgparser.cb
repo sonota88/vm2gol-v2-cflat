@@ -740,15 +740,15 @@ NodeList* parse_top_stmts(void) {
 NodeItem* parse(void) {
   NodeItem* list_wrapper;
   NodeList* list;
-  NodeList* stmts;
+  NodeList* top_stmts;
   int i;
 
-  stmts = parse_top_stmts();
+  top_stmts = parse_top_stmts();
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "stmts");
-  for (i = 0; i < NodeList_len(stmts); i++) {
-    NodeList_add_item(list, stmts->items[i]);
+  NodeList_add_str_item(list, "top_stmts");
+  for (i = 0; i < NodeList_len(top_stmts); i++) {
+    NodeList_add_item(list, top_stmts->items[i]);
   }
 
   list_wrapper = NodeItem_new(NODE_LIST);
