@@ -252,7 +252,11 @@ NodeList* parse_func(void) {
       break;
     }
 
-    stmt = parse_stmt();
+    if (Token_str_eq(t, "var")) {
+      stmt = parse_var();
+    } else {
+      stmt = parse_stmt();
+    }
 
     list_wrapper = NodeItem_new(NODE_LIST);
     list_wrapper->list = stmt;
@@ -640,8 +644,6 @@ NodeList* parse_stmt(void) {
 
   if (Token_str_eq(t, "func")) {
     return parse_func();
-  } else if (Token_str_eq(t, "var")) {
-    return parse_var();
   } else if (Token_str_eq(t, "set")) {
     return parse_set();
   } else if (Token_str_eq(t, "call")) {
