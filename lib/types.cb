@@ -143,7 +143,7 @@ void NodeList_add_str(NodeList* self, char* str) {
   NodeList_add_item(self, item);
 }
 
-void NodeList_add_list_item(NodeList* self, NodeList* list) {
+void NodeList_add_list(NodeList* self, NodeList* list) {
   NodeItem* item = NodeItem_new(NODE_LIST);
   NodeItem_set_list(item, list);
 
