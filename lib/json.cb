@@ -49,7 +49,7 @@ ParseRetval* parse_array(char* rest) {
       idx = find_non_numeric_index(temp);
       substring(temp_str, temp, 0, idx);
       n = s_to_i(temp_str);
-      NodeList_add_int_item(list, n);
+      NodeList_add_int(list, n);
       pos += strlen(temp_str);
 
     } else if (char_eq(temp[0], '"')) {
