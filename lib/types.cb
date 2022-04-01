@@ -135,7 +135,7 @@ void NodeList_add_int(NodeList* self, int n) {
   NodeList_add_item(self, item);
 }
 
-void NodeList_add_str_item(NodeList* self, char* str) {
+void NodeList_add_str(NodeList* self, char* str) {
   NodeItem* item = (NodeItem*) malloc(sizeof(NodeItem));
   item->kind = NODE_STR;
   NodeItem_set_str_val(item, str);

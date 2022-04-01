@@ -263,8 +263,8 @@ NodeList* parse_func(void) {
   consume_sym("}");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "func");
-  NodeList_add_str_item(list, fn_name);
+  NodeList_add_str(list, "func");
+  NodeList_add_str(list, fn_name);
   NodeList_add_list_item(list, args);
   NodeList_add_list_item(list, stmts);
 
@@ -285,8 +285,8 @@ NodeList* parse_var_declare(void) {
   consume_sym(";");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "var");
-  NodeList_add_str_item(list, var_name);
+  NodeList_add_str(list, "var");
+  NodeList_add_str(list, var_name);
   return list;
 }
 
@@ -309,8 +309,8 @@ NodeList* parse_var_init(void) {
   consume_sym(";");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "var");
-  NodeList_add_str_item(list, var_name);
+  NodeList_add_str(list, "var");
+  NodeList_add_str(list, var_name);
   NodeList_add_item(list, expr);
   return list;
 }
@@ -350,7 +350,7 @@ NodeItem* parse_expr_right(NodeItem* expr_l) {
     consume_sym("+");
     expr_r = parse_expr();
     expr_els = NodeList_new();
-    NodeList_add_str_item(expr_els, "+");
+    NodeList_add_str(expr_els, "+");
     NodeList_add_item(expr_els, expr_l);
     NodeList_add_item(expr_els, expr_r);
 
@@ -358,7 +358,7 @@ NodeItem* parse_expr_right(NodeItem* expr_l) {
     consume_sym("*");
     expr_r = parse_expr();
     expr_els = NodeList_new();
-    NodeList_add_str_item(expr_els, "*");
+    NodeList_add_str(expr_els, "*");
     NodeList_add_item(expr_els, expr_l);
     NodeList_add_item(expr_els, expr_r);
 
@@ -366,7 +366,7 @@ NodeItem* parse_expr_right(NodeItem* expr_l) {
     consume_sym("==");
     expr_r = parse_expr();
     expr_els = NodeList_new();
-    NodeList_add_str_item(expr_els, "eq");
+    NodeList_add_str(expr_els, "eq");
     NodeList_add_item(expr_els, expr_l);
     NodeList_add_item(expr_els, expr_r);
 
@@ -374,7 +374,7 @@ NodeItem* parse_expr_right(NodeItem* expr_l) {
     consume_sym("!=");
     expr_r = parse_expr();
     expr_els = NodeList_new();
-    NodeList_add_str_item(expr_els, "neq");
+    NodeList_add_str(expr_els, "neq");
     NodeList_add_item(expr_els, expr_l);
     NodeList_add_item(expr_els, expr_r);
 
@@ -446,8 +446,8 @@ NodeList* parse_set(void) {
   consume_sym(";");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "set");
-  NodeList_add_str_item(list, var_name);
+  NodeList_add_str(list, "set");
+  NodeList_add_str(list, var_name);
   NodeList_add_item(list, expr);
   return list;
 }
@@ -470,7 +470,7 @@ NodeList* parse_funcall(void) {
   args = parse_args();
   consume_sym(")");
 
-  NodeList_add_str_item(list, fn_name);
+  NodeList_add_str(list, fn_name);
   NodeList_add_all(list, args);
   return list;
 }
@@ -488,7 +488,7 @@ NodeList* parse_call(void) {
   consume_sym(";");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "call");
+  NodeList_add_str(list, "call");
   NodeList_add_all(list, funcall);
   return list;
 }
@@ -512,8 +512,8 @@ NodeList* parse_call_set(void) {
   consume_sym(";");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "call_set");
-  NodeList_add_str_item(list, var_name);
+  NodeList_add_str(list, "call_set");
+  NodeList_add_str(list, var_name);
   NodeList_add_list_item(list, funcall);
   return list;
 }
@@ -529,7 +529,7 @@ NodeList* parse_return(void) {
   consume_sym(";");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "return");
+  NodeList_add_str(list, "return");
   NodeList_add_item(list, expr);
   return list;
 }
@@ -550,7 +550,7 @@ NodeList* parse_while(void) {
   consume_sym("}");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "while");
+  NodeList_add_str(list, "while");
   NodeList_add_item(list, expr);
   NodeList_add_list_item(list, stmts);
   return list;
@@ -604,7 +604,7 @@ NodeList* parse_case(void) {
   consume_sym("}");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "case");
+  NodeList_add_str(list, "case");
   NodeList_add_all(list, when_clauses);
   return list;
 }
@@ -625,8 +625,8 @@ NodeList* parse_vm_comment(void) {
   consume_sym(";");
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "_cmt");
-  NodeList_add_str_item(list, comment);
+  NodeList_add_str(list, "_cmt");
+  NodeList_add_str(list, comment);
   return list;
 }
 
@@ -729,7 +729,7 @@ NodeList* parse(void) {
   top_stmts = parse_top_stmts();
 
   list = NodeList_new();
-  NodeList_add_str_item(list, "top_stmts");
+  NodeList_add_str(list, "top_stmts");
   for (i = 0; i < NodeList_len(top_stmts); i++) {
     NodeList_add_item(list, top_stmts->items[i]);
   }
