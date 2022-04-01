@@ -39,7 +39,7 @@ void to_fn_arg_ref(char* dest, Names* names, char* name) {
   if (i < 0) {
     codegen_error("to_fn_arg_ref", __LINE__);
   }
-  sprintf(dest, "[bp+%d]", i + 2);
+  sprintf(dest, "[bp:%d]", i + 2);
 }
 
 void to_lvar_ref(char* dest, Names* names, char* name) {
