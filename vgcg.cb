@@ -411,7 +411,6 @@ void codegen_case(
   NodeList* when_block;
   NodeItem* cond;
   NodeList* rest;
-  NodeItem* cond_head;
   char[512] cond_json;
   int i;
 
@@ -427,14 +426,11 @@ void codegen_case(
     cond = NodeList_head(when_block);
     rest = NodeList_rest(when_block);
 
-    cond_head = NodeList_head(cond->list);
-
     to_json_line(cond_json, cond);
     printf("  # when_%d_%d: %s\n",
            label_id, when_idx, cond_json
            );
 
-    if (NodeItem_str_eq(cond_head, "eq")) {
       printf("  # -->> expr\n");
       codegen_expr(fn_arg_names, lvar_names, cond);
       printf("  # <<-- expr\n");
@@ -452,10 +448,6 @@ void codegen_case(
 
       // 偽の場合ここにジャンプ
       printf("label end_when_%d_%d\n", label_id, when_idx);
-
-    } else {
-      not_yet_impl("codegen_case", __LINE__);
-    }
   }
 
   printf("label end_case_%d\n", label_id);
