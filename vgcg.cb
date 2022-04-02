@@ -191,8 +191,20 @@ void codegen_expr(
   Names* lvar_names,
   NodeItem* expr
 ) {
+  char[32] cp_src;
+
   if (expr->kind == NODE_INT) {
     printf("  cp %d reg_a\n", expr->int_val);
+  } else if (expr->kind == NODE_STR) {
+    if (Names_contains(fn_arg_names, expr->str_val)) {
+      to_fn_arg_ref(cp_src, fn_arg_names, expr->str_val);
+      printf("  cp %s reg_a\n", cp_src);
+    } else if (Names_contains(lvar_names, expr->str_val)) {
+      to_lvar_ref(cp_src, lvar_names, expr->str_val);
+      printf("  cp %s reg_a\n", cp_src);
+    } else {
+      not_yet_impl("codegen_expr", __LINE__);
+    }
   } else if (expr->kind == NODE_LIST) {
     _codegen_expr_binary(fn_arg_names, lvar_names, expr);
   } else {
