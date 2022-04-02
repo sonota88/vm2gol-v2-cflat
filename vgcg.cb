@@ -50,25 +50,6 @@ void to_lvar_ref(char* dest, Names* names, char* name) {
   sprintf(dest, "[bp:-%d]", i + 1);
 }
 
-void to_asm_arg(
-  char* dest,
-  Names* fn_arg_names,
-  Names* lvar_names,
-  NodeItem* val
-) {
-  dest[0] = '\0';
-
-  if (val->kind == NODE_INT) {
-    sprintf(dest, "%d", val->int_val);
-  } else if (val->kind == NODE_STR) {
-    if (Names_contains(fn_arg_names, val->str_val)) {
-      to_fn_arg_ref(dest, fn_arg_names, val->str_val);
-    } else if (Names_contains(lvar_names, val->str_val)) {
-      to_lvar_ref(dest, lvar_names, val->str_val);
-    }
-  }
-}
-
 // --------------------------------
 
 void codegen_var(
@@ -92,7 +73,18 @@ void codegen_expr_push(
 
   puts_fn("-->> codegen_expr_push");
 
-  to_asm_arg(push_arg, fn_arg_names, lvar_names, val);
+  push_arg[0] = '\0';
+
+  if (val->kind == NODE_INT) {
+    sprintf(push_arg, "%d", val->int_val);
+  } else if (val->kind == NODE_STR) {
+    if (Names_contains(fn_arg_names, val->str_val)) {
+      to_fn_arg_ref(push_arg, fn_arg_names, val->str_val);
+    } else if (Names_contains(lvar_names, val->str_val)) {
+      to_lvar_ref(push_arg, lvar_names, val->str_val);
+    }
+  }
+
   if (strlen(push_arg) == 0) {
     if (val->kind == NODE_LIST) {
       codegen_expr(fn_arg_names, lvar_names, val);
@@ -207,7 +199,18 @@ void codegen_call_push_fn_arg(
 ) {
   char[32] push_arg;
 
-  to_asm_arg(push_arg, fn_arg_names, lvar_names, fn_arg);
+  push_arg[0] = '\0';
+
+  if (fn_arg->kind == NODE_INT) {
+    sprintf(push_arg, "%d", fn_arg->int_val);
+  } else if (fn_arg->kind == NODE_STR) {
+    if (Names_contains(fn_arg_names, fn_arg->str_val)) {
+      to_fn_arg_ref(push_arg, fn_arg_names, fn_arg->str_val);
+    } else if (Names_contains(lvar_names, fn_arg->str_val)) {
+      to_lvar_ref(push_arg, lvar_names, fn_arg->str_val);
+    }
+  }
+
   if (strlen(push_arg) == 0) {
     not_yet_impl("codegen_call_push_fn_arg", __LINE__);
   }
@@ -318,7 +321,18 @@ void codegen_set(
 
   puts_fn("-->> codegen_set");
 
-  to_asm_arg(src_val, fn_arg_names, lvar_names, expr);
+  src_val[0] = '\0';
+
+  if (expr->kind == NODE_INT) {
+    sprintf(src_val, "%d", expr->int_val);
+  } else if (expr->kind == NODE_STR) {
+    if (Names_contains(fn_arg_names, expr->str_val)) {
+      to_fn_arg_ref(src_val, fn_arg_names, expr->str_val);
+    } else if (Names_contains(lvar_names, expr->str_val)) {
+      to_lvar_ref(src_val, lvar_names, expr->str_val);
+    }
+  }
+
   if (strlen(src_val) == 0) {
     if (expr->kind == NODE_STR) {
 
@@ -329,19 +343,17 @@ void codegen_set(
           strcpy(src_val, "reg_a");
         } else {
 
-          to_asm_arg(
-            ref,
-            fn_arg_names,
-            lvar_names,
-            NodeItem_new_str(vram_ref)
-          );
-          if (strlen(ref) != 0) {
-            printf("  get_vram %s reg_a\n", ref);
+          if (Names_contains(fn_arg_names, vram_ref)) {
+            to_fn_arg_ref(ref, fn_arg_names, vram_ref);
+          } else if (Names_contains(lvar_names, vram_ref)) {
+            to_lvar_ref(ref, lvar_names, vram_ref);
           } else {
             not_yet_impl("codegen_set", __LINE__);
           }
+          printf("  get_vram %s reg_a\n", ref);
 
           strcpy(src_val, "reg_a");
+
         }
       } else {
         not_yet_impl("codegen_set", __LINE__);
@@ -367,17 +379,16 @@ void codegen_set(
       printf("  set_vram %s %s\n", vram_ref, src_val);
     } else {
 
-      to_asm_arg(
-        ref,
-        fn_arg_names,
-        lvar_names,
-        NodeItem_new_str(vram_ref)
-      );
-      if (strlen(ref) == 0) {
+      if (Names_contains(fn_arg_names, vram_ref)) {
+        to_fn_arg_ref(ref, fn_arg_names, vram_ref);
+      } else if (Names_contains(lvar_names, vram_ref)) {
+        to_lvar_ref(ref, lvar_names, vram_ref);
+      } else {
         not_yet_impl("codegen_set", __LINE__);
       }
+
       printf("  set_vram %s %s\n", ref, src_val);
-      
+
     }
 
   } else if (Names_contains(lvar_names, dest_str)) {
@@ -411,13 +422,11 @@ void codegen_return(
         not_yet_impl("codegen_return", __LINE__);
       } else {
 
-        to_asm_arg(
-          ref,
-          Names_empty(),
-          lvar_names,
-          NodeItem_new_str(vram_ref)
-        );
-        if (strlen(ref) == 0) {
+        if (Names_contains(fn_arg_names, vram_ref)) {
+          to_fn_arg_ref(ref, fn_arg_names, vram_ref);
+        } else if (Names_contains(lvar_names, vram_ref)) {
+          to_lvar_ref(ref, lvar_names, vram_ref);
+        } else {
           not_yet_impl("codegen_set", __LINE__);
         }
 
