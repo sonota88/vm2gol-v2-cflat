@@ -186,32 +186,6 @@ void codegen_expr(
   }
 }
 
-void codegen_call_push_fn_arg(
-  Names* fn_arg_names,
-  Names* lvar_names,
-  NodeItem* fn_arg
-) {
-  char[32] push_arg;
-
-  push_arg[0] = '\0';
-
-  if (fn_arg->kind == NODE_INT) {
-    sprintf(push_arg, "%d", fn_arg->int_val);
-  } else if (fn_arg->kind == NODE_STR) {
-    if (Names_contains(fn_arg_names, fn_arg->str_val)) {
-      to_fn_arg_ref(push_arg, fn_arg_names, fn_arg->str_val);
-    } else if (Names_contains(lvar_names, fn_arg->str_val)) {
-      to_lvar_ref(push_arg, lvar_names, fn_arg->str_val);
-    }
-  }
-
-  if (strlen(push_arg) == 0) {
-    not_yet_impl("codegen_call_push_fn_arg", __LINE__);
-  }
-
-  printf("  cp %s reg_a\n", push_arg);
-}
-
 void codegen_call(
   Names* fn_arg_names,
   Names* lvar_names,
@@ -228,7 +202,7 @@ void codegen_call(
 
   for (i = NodeList_len(fn_args) - 1; i >= 0; i--) {
     fn_arg = fn_args->items[i];
-    codegen_call_push_fn_arg(fn_arg_names, lvar_names, fn_arg);
+    codegen_expr(fn_arg_names, lvar_names, fn_arg);
     printf("  push reg_a\n");
   }
 
@@ -261,7 +235,7 @@ void codegen_call_set(
 
   for (i = NodeList_len(fn_args) - 1; i >= 0; i--) {
     fn_arg = fn_args->items[i];
-    codegen_call_push_fn_arg(fn_arg_names, lvar_names, fn_arg);
+    codegen_expr(fn_arg_names, lvar_names, fn_arg);
     printf("  push reg_a\n");
   }
 
