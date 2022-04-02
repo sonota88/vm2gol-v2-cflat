@@ -69,33 +69,25 @@ void codegen_expr_push(
   Names* lvar_names,
   NodeItem* val
 ) {
-  char[16] push_arg;
+  char[16] cp_src;
 
   puts_fn("-->> codegen_expr_push");
 
-  push_arg[0] = '\0';
-
   if (val->kind == NODE_INT) {
-    sprintf(push_arg, "%d", val->int_val);
+    printf("  cp %d reg_a\n", val->int_val);
   } else if (val->kind == NODE_STR) {
     if (Names_contains(fn_arg_names, val->str_val)) {
-      to_fn_arg_ref(push_arg, fn_arg_names, val->str_val);
+      to_fn_arg_ref(cp_src, fn_arg_names, val->str_val);
+      printf("  cp %s reg_a\n", cp_src);
     } else if (Names_contains(lvar_names, val->str_val)) {
-      to_lvar_ref(push_arg, lvar_names, val->str_val);
+      to_lvar_ref(cp_src, lvar_names, val->str_val);
+      printf("  cp %s reg_a\n", cp_src);
     }
-  }
-
-  if (strlen(push_arg) == 0) {
-    if (val->kind == NODE_LIST) {
-      _codegen_expr_binary(fn_arg_names, lvar_names, val);
-      strcpy(push_arg, "reg_a");
-    }
-  }
-  if (strlen(push_arg) == 0) {
+  } else if (val->kind == NODE_LIST) {
+    _codegen_expr_binary(fn_arg_names, lvar_names, val);
+  } else {
     not_yet_impl("codegen_expr_push", __LINE__);
   }
-
-  printf("  push %s\n", push_arg);
 }
 
 void codegen_expr_add(void) {
@@ -177,7 +169,9 @@ void _codegen_expr_binary(
   term_r = NodeList_get(args, 1);
 
   codegen_expr_push(fn_arg_names, lvar_names, term_l);
+  printf("  push reg_a\n");
   codegen_expr_push(fn_arg_names, lvar_names, term_r);
+  printf("  push reg_a\n");
 
   if (NodeItem_str_eq(operator, "+")) {
     codegen_expr_add();
