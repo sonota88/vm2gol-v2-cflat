@@ -1,7 +1,5 @@
 // -*- mode: c -*-
 
-import stdio;
-
 import lib.common_import;
 import lib.utils;
 import lib.types;
