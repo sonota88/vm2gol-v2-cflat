@@ -209,7 +209,7 @@ void codegen_call_push_fn_arg(
     not_yet_impl("codegen_call_push_fn_arg", __LINE__);
   }
 
-  printf("  push %s\n", push_arg);
+  printf("  cp %s reg_a\n", push_arg);
 }
 
 void codegen_call(
@@ -229,6 +229,7 @@ void codegen_call(
   for (i = NodeList_len(fn_args) - 1; i >= 0; i--) {
     fn_arg = fn_args->items[i];
     codegen_call_push_fn_arg(fn_arg_names, lvar_names, fn_arg);
+    printf("  push reg_a\n");
   }
 
   sprintf(vm_comment, "call  %s", fn_name);
@@ -261,6 +262,7 @@ void codegen_call_set(
   for (i = NodeList_len(fn_args) - 1; i >= 0; i--) {
     fn_arg = fn_args->items[i];
     codegen_call_push_fn_arg(fn_arg_names, lvar_names, fn_arg);
+    printf("  push reg_a\n");
   }
 
   sprintf(vm_comment, "call_set  %s", fn_name);
