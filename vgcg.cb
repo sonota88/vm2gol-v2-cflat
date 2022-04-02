@@ -186,6 +186,18 @@ void _codegen_expr_binary(
   }
 }
 
+void codegen_expr(
+  Names* fn_arg_names,
+  Names* lvar_names,
+  NodeItem* expr
+) {
+  if (expr->kind == NODE_LIST) {
+    _codegen_expr_binary(fn_arg_names, lvar_names, expr);
+  } else {
+    not_yet_impl("codegen_expr", __LINE__);
+  }
+}
+
 void codegen_call_push_fn_arg(
   Names* fn_arg_names,
   Names* lvar_names,
