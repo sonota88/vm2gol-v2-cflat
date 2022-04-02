@@ -166,6 +166,8 @@ void codegen_expr(
   NodeItem* expr
 ) {
   char[32] cp_src;
+  char[16] vram_param;
+  char[16] vram_ref;
 
   if (expr->kind == NODE_INT) {
     printf("  cp %d reg_a\n", expr->int_val);
@@ -176,6 +178,22 @@ void codegen_expr(
     } else if (Names_contains(lvar_names, expr->str_val)) {
       to_lvar_ref(cp_src, lvar_names, expr->str_val);
       printf("  cp %s reg_a\n", cp_src);
+    } else if (match_vram(vram_param, expr->str_val)) {
+
+      if (is_number(vram_param)) {
+        printf("  get_vram %s reg_a\n", vram_param);
+      } else {
+        if (Names_contains(fn_arg_names, vram_param)) {
+          to_fn_arg_ref(vram_ref, fn_arg_names, vram_param);
+        } else if (Names_contains(lvar_names, vram_param)) {
+          to_lvar_ref(vram_ref, lvar_names, vram_param);
+        } else {
+          not_yet_impl("codegen_expr", __LINE__);
+        }
+
+        printf("  get_vram %s reg_a\n", vram_ref);
+      }
+
     } else {
       not_yet_impl("codegen_expr", __LINE__);
     }
