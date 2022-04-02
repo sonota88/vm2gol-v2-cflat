@@ -1,6 +1,6 @@
 ENV["LANG"] = "C"
 
-CC = File.expand_path("cbc.sh")
+CC = "cbc"
 
 TEMP_DIR = "z_tmp"
 
