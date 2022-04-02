@@ -384,7 +384,7 @@ void codegen_while(
 
   printf("label while_%d\n", label_id);
 
-  _codegen_expr_binary(fn_arg_names, lvar_names, cond_expr);
+  codegen_expr(fn_arg_names, lvar_names, cond_expr);
   printf("  set_reg_b 1\n");
   printf("  compare\n");
 
@@ -436,7 +436,7 @@ void codegen_case(
 
     if (NodeItem_str_eq(cond_head, "eq")) {
       printf("  # -->> expr\n");
-      _codegen_expr_binary(fn_arg_names, lvar_names, cond);
+      codegen_expr(fn_arg_names, lvar_names, cond);
       printf("  # <<-- expr\n");
       printf("  set_reg_b 1\n");
 
