@@ -191,7 +191,9 @@ void codegen_expr(
   Names* lvar_names,
   NodeItem* expr
 ) {
-  if (expr->kind == NODE_LIST) {
+  if (expr->kind == NODE_INT) {
+    printf("  cp %d reg_a\n", expr->int_val);
+  } else if (expr->kind == NODE_LIST) {
     _codegen_expr_binary(fn_arg_names, lvar_names, expr);
   } else {
     not_yet_impl("codegen_expr", __LINE__);
