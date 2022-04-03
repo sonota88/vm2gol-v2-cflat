@@ -11,4 +11,6 @@ docker build \
   --build-arg USER=$USER \
   --build-arg GROUP=$(id -gn) \
   -t vm2gol-v2-cflat:0.0.1 .
+
+./test.sh all
 ```
