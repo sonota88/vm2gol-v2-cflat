@@ -385,7 +385,7 @@ void codegen_while(
   printf("label while_%d\n", label_id);
 
   codegen_expr(fn_arg_names, lvar_names, cond_expr);
-  printf("  set_reg_b 1\n");
+  printf("  cp 1 reg_b\n");
   printf("  compare\n");
 
   printf("  jump_eq true_%d\n", label_id);
@@ -434,7 +434,7 @@ void codegen_case(
       printf("  # -->> expr\n");
       codegen_expr(fn_arg_names, lvar_names, cond);
       printf("  # <<-- expr\n");
-      printf("  set_reg_b 1\n");
+      printf("  cp 1 reg_b\n");
 
       printf("  compare\n");
       printf("  jump_eq when_%d_%d\n", label_id, when_idx);
