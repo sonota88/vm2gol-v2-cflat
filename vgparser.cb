@@ -399,22 +399,16 @@ NodeItem* parse_expr(void) {
     expr_l = parse_expr();
     consume_sym(")");
 
-    return parse_expr_right(expr_l);
-
   } else if (tl->kind == TOKEN_INT) {
     g_pos++;
     n = s_to_i(tl->str);
 
     expr_l = NodeItem_new_int(n);
 
-    return parse_expr_right(expr_l);
-
   } else if (tl->kind == TOKEN_IDENT) {
     g_pos++;
 
     expr_l = NodeItem_new_str(tl->str);
-
-    return parse_expr_right(expr_l);
 
   } else {
 
@@ -422,6 +416,8 @@ NodeItem* parse_expr(void) {
     parse_error("Unexpected token kind", __LINE__);
     exit(2);
   }
+
+  return parse_expr_right(expr_l);
 }
 
 NodeList* parse_set(void) {
