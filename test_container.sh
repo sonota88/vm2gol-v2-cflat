@@ -37,7 +37,7 @@ run_test_json() {
 run_lex() {
   local infile="$1"; shift
 
-  cat $infile | bin/vgtokenizer
+  cat $infile | bin/vglexer
 }
 
 run_parse() {

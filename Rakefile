@@ -10,7 +10,7 @@ SRC_JSON  = "lib/json.cb"
 
 BINS = [
   "bin/test_json",
-  "bin/vgtokenizer",
+  "bin/vglexer",
   "bin/vgparser",
   "bin/vgcg",
 ]
@@ -49,7 +49,7 @@ file "bin/test_json" => ["lib/test_json.cb", SRC_UTILS, SRC_TYPES, SRC_JSON] do 
   compile(t)
 end
 
-file "bin/vgtokenizer" => ["vgtokenizer.cb", SRC_UTILS] do |t|
+file "bin/vglexer" => ["vglexer.cb", SRC_UTILS] do |t|
   compile(t)
 end
 
