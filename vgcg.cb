@@ -178,22 +178,6 @@ void codegen_expr(
     } else if (Names_contains(lvar_names, expr->str_val)) {
       to_lvar_ref(cp_src, lvar_names, expr->str_val);
       printf("  cp %s reg_a\n", cp_src);
-    } else if (match_vram(vram_param, expr->str_val)) {
-
-      if (is_number(vram_param)) {
-        printf("  get_vram %s reg_a\n", vram_param);
-      } else {
-        if (Names_contains(fn_arg_names, vram_param)) {
-          to_fn_arg_ref(vram_ref, fn_arg_names, vram_param);
-        } else if (Names_contains(lvar_names, vram_param)) {
-          to_lvar_ref(vram_ref, lvar_names, vram_param);
-        } else {
-          not_yet_impl("codegen_expr", __LINE__);
-        }
-
-        printf("  get_vram %s reg_a\n", vram_ref);
-      }
-
     } else {
       not_yet_impl("codegen_expr", __LINE__);
     }
@@ -250,20 +234,6 @@ void codegen_call_set(
   printf("  cp reg_a %s\n", ref);
 }
 
-int match_vram(char* dest, char* str) {
-  int to_i;
-
-  if (strncmp(str, "vram[", 5) != 0) {
-    dest = NULL;
-    return 0;
-  }
-
-  to_i = find_index(str, ']', 5);
-  substring(dest, str, 5, to_i);
-
-  return 1;
-}
-
 int is_number(char* str) {
   int len = strlen(str);
   int i;
@@ -296,24 +266,7 @@ void codegen_set(
 
   strcpy(dest_str, dest->str_val);
 
-  if (match_vram(vram_ref, dest_str)) {
-    if (is_number(vram_ref)) {
-      printf("  set_vram %s reg_a\n", vram_ref);
-    } else {
-
-      if (Names_contains(fn_arg_names, vram_ref)) {
-        to_fn_arg_ref(ref, fn_arg_names, vram_ref);
-      } else if (Names_contains(lvar_names, vram_ref)) {
-        to_lvar_ref(ref, lvar_names, vram_ref);
-      } else {
-        not_yet_impl("codegen_set", __LINE__);
-      }
-
-      printf("  set_vram %s reg_a\n", ref);
-
-    }
-
-  } else if (Names_contains(lvar_names, dest_str)) {
+  if (Names_contains(lvar_names, dest_str)) {
     to_lvar_ref(ref, lvar_names, dest_str);
     printf("  cp reg_a %s\n", ref);
 
