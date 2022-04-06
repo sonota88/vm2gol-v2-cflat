@@ -131,7 +131,7 @@ int is_ident_char(char ch) {
   return (
        ('a' <= ch && ch <= 'z')
     || ('0' <= ch && ch <= '9')
-    || match_any_char("_", ch)
+    || ch == '_'
   );
 }
 
