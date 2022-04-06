@@ -394,15 +394,14 @@ NodeItem* parse_expr(void) {
 
   tl = peek(0);
 
-  if (Token_is(tl, TOKEN_SYM, "(")) {
+  if (tl->kind == TOKEN_SYM) {
     consume_sym("(");
     expr_l = parse_expr();
     consume_sym(")");
 
     return parse_expr_right(expr_l);
-  }
 
-  if (tl->kind == TOKEN_INT) {
+  } else if (tl->kind == TOKEN_INT) {
     g_pos++;
     n = s_to_i(tl->str);
 
