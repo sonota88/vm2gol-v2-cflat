@@ -566,6 +566,19 @@ void codegen_builtin_set_vram(void) {
   printf("  ret\n");
 }
 
+void codegen_builtin_get_vram(void) {
+  printf("\n");
+  printf("label get_vram\n");
+  printf("  push bp\n");
+  printf("  cp sp bp\n");
+
+  printf("  get_vram [bp:2] reg_a\n"); // vram_addr dest
+
+  printf("  cp bp sp\n");
+  printf("  pop bp\n");
+  printf("  ret\n");
+}
+
 int main(void) {
   char[INPUT_SIZE] input;
   NodeList* tree;
@@ -583,6 +596,7 @@ int main(void) {
 
   printf("#>builtins");
   codegen_builtin_set_vram();
+  codegen_builtin_get_vram();
   printf("#<builtins");
 
   return 0;
