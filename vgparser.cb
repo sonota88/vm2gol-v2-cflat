@@ -419,14 +419,56 @@ NodeItem* parse_expr_right(NodeItem* expr_l) {
   return NodeItem_new_list(expr_els);
 }
 
+int is_binary_op(Token* t) {
+  if (str_eq(t->str, "+")) {
+    return 1;
+  } else if (str_eq(t->str, "*")) {
+    return 1;
+  } else if (str_eq(t->str, "==")) {
+    return 1;
+  } else if (str_eq(t->str, "!=")) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 NodeItem* parse_expr(void) {
-  NodeItem* expr_l;
+  NodeItem* expr;
+  NodeItem* expr_r;
+  NodeList* list;
+  char* op;
 
   puts_fn("-->> parse_expr");
 
-  expr_l = _parse_expr_factor();
+  expr = _parse_expr_factor();
 
-  return parse_expr_right(expr_l);
+  while (is_binary_op(peek(0))) {
+    if (str_eq(peek(0)->str, "+")) {
+      op = "+";
+    } else if (str_eq(peek(0)->str, "*")) {
+      op = "*";
+    } else if (str_eq(peek(0)->str, "==")) {
+      op = "eq";
+    } else if (str_eq(peek(0)->str, "!=")) {
+      op = "neq";
+    } else {
+      not_yet_impl("Unsupported operator", __LINE__);
+    }
+
+    g_pos++;
+
+    expr_r = _parse_expr_factor();
+
+    list = NodeList_new();
+    NodeList_add_str(list, op);
+    NodeList_add_item(list, expr);
+    NodeList_add_item(list, expr_r);
+
+    expr = NodeItem_new_list(list);
+  }
+
+  return expr;
 }
 
 NodeList* parse_set(void) {
