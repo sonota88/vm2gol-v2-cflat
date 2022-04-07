@@ -34,12 +34,12 @@ int get_label_id(void) {
   return g_label_id;
 }
 
-void to_fn_arg_ref(char* dest, Names* names, char* name) {
+int to_fn_arg_disp(Names* names, char* name) {
   int i = Names_index(names, name);
   if (i < 0) {
-    codegen_error("to_fn_arg_ref", __LINE__);
+    codegen_error("to_fn_arg_disp", __LINE__);
   }
-  sprintf(dest, "[bp:%d]", i + 2);
+  return i + 2;
 }
 
 void to_lvar_ref(char* dest, Names* names, char* name) {
@@ -166,13 +166,14 @@ void gen_expr(
   NodeItem* expr
 ) {
   char[32] cp_src;
+  int disp;
 
   if (expr->kind == NODE_INT) {
     printf("  cp %d reg_a\n", expr->int_val);
   } else if (expr->kind == NODE_STR) {
     if (Names_contains(fn_arg_names, expr->str_val)) {
-      to_fn_arg_ref(cp_src, fn_arg_names, expr->str_val);
-      printf("  cp %s reg_a\n", cp_src);
+      disp = to_fn_arg_disp(fn_arg_names, expr->str_val);
+      printf("  cp [bp:%d] reg_a\n", disp);
     } else if (Names_contains(lvar_names, expr->str_val)) {
       to_lvar_ref(cp_src, lvar_names, expr->str_val);
       printf("  cp %s reg_a\n", cp_src);
