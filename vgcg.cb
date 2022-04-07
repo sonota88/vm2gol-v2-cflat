@@ -166,8 +166,6 @@ void gen_expr(
   NodeItem* expr
 ) {
   char[32] cp_src;
-  char[16] vram_param;
-  char[16] vram_ref;
 
   if (expr->kind == NODE_INT) {
     printf("  cp %d reg_a\n", expr->int_val);
@@ -223,7 +221,6 @@ void gen_call_set(
   char[64] lvar_name;
   NodeList* fn_temp;
   char[32] ref;
-  int i;
   
   strcpy(lvar_name, NodeList_head(stmt_rest)->str_val);
   fn_temp = NodeList_get(stmt_rest, 1)->list ;
@@ -258,7 +255,6 @@ void gen_set(
   NodeItem* expr = rest->items[1];
   char[64] dest_str;
   char[16] ref;
-  char[16] vram_ref;
 
   puts_fn("-->> gen_set");
 
