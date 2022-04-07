@@ -60,7 +60,10 @@ int match_kw(char* rest) {
 
   size = 6;
   if (
-       strncmp(rest, "return", size) == 0
+    (
+         strncmp(rest, "return", size) == 0
+      || strncmp(rest, "_debug", size) == 0
+    )
     && !(is_kw_char(rest[size]))
   ) {
     return size;

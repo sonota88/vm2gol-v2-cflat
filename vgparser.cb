@@ -587,6 +587,19 @@ NodeList* parse_vm_comment(void) {
   return list;
 }
 
+NodeList* parse_debug(void) {
+  NodeList* list;
+
+  consume_kw("_debug");
+  consume_sym("(");
+  consume_sym(")");
+  consume_sym(";");
+
+  list = NodeList_new();
+  NodeList_add_str(list, "_debug");
+  return list;
+}
+
 NodeList* parse_stmt(void) {
   Token* t = peek(0);
 
@@ -606,6 +619,8 @@ NodeList* parse_stmt(void) {
     return parse_case();
   } else if (Token_str_eq(t, "_cmt")) {
     return parse_vm_comment();
+  } else if (Token_str_eq(t, "_debug")) {
+    return parse_debug();
   } else {
     Token_dump(t);
     not_yet_impl("parse_stmt", __LINE__);
