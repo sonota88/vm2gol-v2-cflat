@@ -42,12 +42,12 @@ int to_fn_arg_disp(Names* names, char* name) {
   return i + 2;
 }
 
-void to_lvar_ref(char* dest, Names* names, char* name) {
+int to_lvar_disp(Names* names, char* name) {
   int i = Names_index(names, name);
   if (i < 0) {
-    codegen_error("to_lvar_ref", __LINE__);
+    codegen_error("to_lvar_disp", __LINE__);
   }
-  sprintf(dest, "[bp:-%d]", i + 1);
+  return -(i + 1);
 }
 
 // --------------------------------
@@ -165,7 +165,6 @@ void gen_expr(
   Names* lvar_names,
   NodeItem* expr
 ) {
-  char[32] cp_src;
   int disp;
 
   if (expr->kind == NODE_INT) {
@@ -175,8 +174,8 @@ void gen_expr(
       disp = to_fn_arg_disp(fn_arg_names, expr->str_val);
       printf("  cp [bp:%d] reg_a\n", disp);
     } else if (Names_contains(lvar_names, expr->str_val)) {
-      to_lvar_ref(cp_src, lvar_names, expr->str_val);
-      printf("  cp %s reg_a\n", cp_src);
+      disp = to_lvar_disp(lvar_names, expr->str_val);
+      printf("  cp [bp:%d] reg_a\n", disp);
     } else {
       not_yet_impl("gen_expr", __LINE__);
     }
@@ -221,15 +220,15 @@ void gen_call_set(
 ) {
   char[64] lvar_name;
   NodeList* fn_temp;
-  char[32] ref;
+  int disp;
   
   strcpy(lvar_name, NodeList_head(stmt_rest)->str_val);
   fn_temp = NodeList_get(stmt_rest, 1)->list ;
 
   gen_call(fn_arg_names, lvar_names, fn_temp);
 
-  to_lvar_ref(ref, lvar_names, lvar_name);
-  printf("  cp reg_a %s\n", ref);
+  disp = to_lvar_disp(lvar_names, lvar_name);
+  printf("  cp reg_a [bp:%d]\n", disp);
 }
 
 int is_number(char* str) {
@@ -255,7 +254,7 @@ void gen_set(
   NodeItem* dest = rest->items[0];
   NodeItem* expr = rest->items[1];
   char[64] dest_str;
-  char[16] ref;
+  int disp;
 
   puts_fn("-->> gen_set");
 
@@ -264,8 +263,8 @@ void gen_set(
   strcpy(dest_str, dest->str_val);
 
   if (Names_contains(lvar_names, dest_str)) {
-    to_lvar_ref(ref, lvar_names, dest_str);
-    printf("  cp reg_a %s\n", ref);
+    disp = to_lvar_disp(lvar_names, dest_str);
+    printf("  cp reg_a [bp:%d]\n", disp);
 
   } else {
     not_yet_impl("gen_set", __LINE__);
