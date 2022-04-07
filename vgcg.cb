@@ -281,22 +281,6 @@ void gen_return(
   gen_expr(fn_arg_names, lvar_names, retval);
 }
 
-void gen_vm_comment(
-  char* comment
-) {
-  char[256] temp;
-  int i;
-  for (i = 0; i < strlen(comment); i++) {
-    if (char_eq(comment[i], ' ')) {
-      temp[i] = '~';
-    } else {
-      temp[i] = comment[i];
-    }
-  }
-  temp[i] = '\0';
-  printf("  _cmt %s\n", temp);
-}
-
 void gen_while(
   Names* fn_arg_names,
   Names* lvar_names,
@@ -386,6 +370,22 @@ void gen_case(
   printf("label end_case_%d\n", label_id);
   printf("  # <<-- case_%d\n", label_id);
   printf("\n");
+}
+
+void gen_vm_comment(
+  char* comment
+) {
+  char[256] temp;
+  int i;
+  for (i = 0; i < strlen(comment); i++) {
+    if (char_eq(comment[i], ' ')) {
+      temp[i] = '~';
+    } else {
+      temp[i] = comment[i];
+    }
+  }
+  temp[i] = '\0';
+  printf("  _cmt %s\n", temp);
 }
 
 void gen_stmt(
