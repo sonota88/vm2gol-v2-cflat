@@ -366,59 +366,6 @@ NodeItem* _parse_expr_factor(void) {
   }
 }
 
-NodeItem* parse_expr_right(NodeItem* expr_l) {
-  Token* t;
-  NodeList* expr_els;
-  NodeItem* expr_r;
-
-  t = peek(0);
-
-  if (
-      Token_is(t, TOKEN_SYM, ";") ||
-      Token_is(t, TOKEN_SYM, ")")
-  ) {
-    return expr_l;
-  }
-
-  if (Token_is(t, TOKEN_SYM, "+")) {
-    consume_sym("+");
-    expr_r = parse_expr();
-    expr_els = NodeList_new();
-    NodeList_add_str(expr_els, "+");
-    NodeList_add_item(expr_els, expr_l);
-    NodeList_add_item(expr_els, expr_r);
-
-  } else if (Token_is(t, TOKEN_SYM, "*")) {
-    consume_sym("*");
-    expr_r = parse_expr();
-    expr_els = NodeList_new();
-    NodeList_add_str(expr_els, "*");
-    NodeList_add_item(expr_els, expr_l);
-    NodeList_add_item(expr_els, expr_r);
-
-  } else if (Token_is(t, TOKEN_SYM, "==")) {
-    consume_sym("==");
-    expr_r = parse_expr();
-    expr_els = NodeList_new();
-    NodeList_add_str(expr_els, "eq");
-    NodeList_add_item(expr_els, expr_l);
-    NodeList_add_item(expr_els, expr_r);
-
-  } else if (Token_is(t, TOKEN_SYM, "!=")) {
-    consume_sym("!=");
-    expr_r = parse_expr();
-    expr_els = NodeList_new();
-    NodeList_add_str(expr_els, "neq");
-    NodeList_add_item(expr_els, expr_l);
-    NodeList_add_item(expr_els, expr_r);
-
-  } else {
-    not_yet_impl("Unsupported operator", __LINE__);
-  }
-
-  return NodeItem_new_list(expr_els);
-}
-
 int is_binary_op(Token* t) {
   if (str_eq(t->str, "+")) {
     return 1;
