@@ -362,7 +362,7 @@ NodeItem* parse_expr(void) {
     } else if (str_eq(peek(0)->str, "==")) {
       op = "==";
     } else if (str_eq(peek(0)->str, "!=")) {
-      op = "neq";
+      op = "!=";
     } else {
       not_yet_impl("Unsupported operator", __LINE__);
     }

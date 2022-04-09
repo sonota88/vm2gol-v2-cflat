@@ -151,7 +151,7 @@ void _gen_expr_binary(
     gen_expr_mult();
   } else if (NodeItem_str_eq(operator, "==")) {
     gen_expr_eq();
-  } else if (NodeItem_str_eq(operator, "neq")) {
+  } else if (NodeItem_str_eq(operator, "!=")) {
     gen_expr_neq();
   } else {
     not_yet_impl("_gen_expr_binary", __LINE__);
