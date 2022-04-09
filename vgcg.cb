@@ -517,14 +517,17 @@ void gen_func_def(NodeList* func_def) {
   printf("  ret\n");
 }
 
-void gen_top_stmts(NodeList* list) {
+void gen_top_stmts(NodeList* tree) {
   NodeItem* item;
   char* head;
+  NodeList* top_stmts;
   NodeList* top_stmt;
   int i;
 
-  for (i = 0; i < NodeList_len(list); i++) {
-    item = list->items[i];
+  top_stmts = NodeList_rest(tree);
+
+  for (i = 0; i < NodeList_len(top_stmts); i++) {
+    item = top_stmts->items[i];
     top_stmt = item->list;
 
     head = NodeList_head(item->list)->str_val;
@@ -562,7 +565,6 @@ void gen_builtin_get_vram(void) {
 int main(void) {
   char[INPUT_SIZE] input;
   NodeList* tree;
-  NodeList* top_stmts;
 
   read_stdin_all(input);
 
@@ -571,8 +573,7 @@ int main(void) {
   printf("  call main\n");
   printf("  exit\n");
 
-  top_stmts = NodeList_rest(tree);
-  gen_top_stmts(top_stmts);
+  gen_top_stmts(tree);
 
   printf("#>builtins");
   gen_builtin_set_vram();
