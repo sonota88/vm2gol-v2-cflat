@@ -214,28 +214,9 @@ void _gen_funcall(
 void gen_call(
   Names* fn_arg_names,
   Names* lvar_names,
-  NodeList* stmt_rest
+  NodeList* funcall
 ) {
-  char* fn_name;
-  NodeList* fn_args;
-  char[256] vm_comment;
-  NodeItem* fn_arg;
-  int i;
-
-  fn_name = NodeList_head(stmt_rest)->str_val;
-  fn_args = NodeList_rest(stmt_rest);
-
-  for (i = NodeList_len(fn_args) - 1; i >= 0; i--) {
-    fn_arg = fn_args->items[i];
-    gen_expr(fn_arg_names, lvar_names, fn_arg);
-    printf("  push reg_a\n");
-  }
-
-  sprintf(vm_comment, "call  %s", fn_name);
-  gen_vm_comment(vm_comment);
-  printf("  call %s\n", fn_name);
-
-  printf("  add_sp %d\n", NodeList_len(fn_args));
+  _gen_funcall(fn_arg_names, lvar_names, funcall);
 }
 
 void gen_call_set(
@@ -244,13 +225,13 @@ void gen_call_set(
   NodeList* stmt_rest
 ) {
   char[64] lvar_name;
-  NodeList* fn_temp;
+  NodeList* fn_temp; // TODO rename funcall
   int disp;
   
   strcpy(lvar_name, NodeList_head(stmt_rest)->str_val);
   fn_temp = NodeList_get(stmt_rest, 1)->list ;
 
-  gen_call(fn_arg_names, lvar_names, fn_temp);
+  _gen_funcall(fn_arg_names, lvar_names, fn_temp);
 
   disp = to_lvar_disp(lvar_names, lvar_name);
   printf("  cp reg_a [bp:%d]\n", disp);
