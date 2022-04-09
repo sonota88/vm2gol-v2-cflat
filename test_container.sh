@@ -49,7 +49,7 @@ run_parse() {
 run_codegen() {
   local infile="$1"; shift
 
-  cat $infile | bin/vgcg
+  cat $infile | bin/vgcodegen
 }
 
 # --------------------------------

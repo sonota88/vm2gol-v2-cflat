@@ -12,7 +12,7 @@ BINS = [
   "bin/test_json",
   "bin/vglexer",
   "bin/vgparser",
-  "bin/vgcg",
+  "bin/vgcodegen",
 ]
 
 def temp_path(path)
@@ -57,6 +57,6 @@ file "bin/vgparser" => ["vgparser.cb", SRC_UTILS, SRC_TYPES, SRC_JSON] do |t|
   compile(t)
 end
 
-file "bin/vgcg" => ["vgcg.cb", SRC_UTILS, SRC_TYPES, SRC_JSON] do |t|
+file "bin/vgcodegen" => ["vgcodegen.cb", SRC_UTILS, SRC_TYPES, SRC_JSON] do |t|
   compile(t)
 end
