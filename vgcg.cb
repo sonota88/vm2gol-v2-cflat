@@ -228,13 +228,13 @@ void gen_call_set(
   NodeList* stmt
 ) {
   char[64] lvar_name;
-  NodeList* fn_temp; // TODO rename funcall
+  NodeList* funcall;
   int disp;
   
   strcpy(lvar_name, NodeList_get(stmt, 1)->str_val);
-  fn_temp = NodeList_get(stmt, 2)->list ;
+  funcall = NodeList_get(stmt, 2)->list ;
 
-  _gen_funcall(fn_arg_names, lvar_names, fn_temp);
+  _gen_funcall(fn_arg_names, lvar_names, funcall);
 
   disp = to_lvar_disp(lvar_names, lvar_name);
   printf("  cp reg_a [bp:%d]\n", disp);
