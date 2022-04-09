@@ -360,7 +360,7 @@ NodeItem* parse_expr(void) {
     } else if (str_eq(peek(0)->str, "*")) {
       op = "*";
     } else if (str_eq(peek(0)->str, "==")) {
-      op = "eq";
+      op = "==";
     } else if (str_eq(peek(0)->str, "!=")) {
       op = "neq";
     } else {

@@ -149,7 +149,7 @@ void _gen_expr_binary(
     gen_expr_add();
   } else if (NodeItem_str_eq(operator, "*")) {
     gen_expr_mult();
-  } else if (NodeItem_str_eq(operator, "eq")) {
+  } else if (NodeItem_str_eq(operator, "==")) {
     gen_expr_eq();
   } else if (NodeItem_str_eq(operator, "neq")) {
     gen_expr_neq();
