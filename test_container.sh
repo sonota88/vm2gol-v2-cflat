@@ -10,15 +10,14 @@ print_project_dir() {
 }
 
 readonly PROJECT_DIR="$(print_project_dir)"
-readonly TEST_DIR="${PROJECT_DIR}/test"
-readonly TEST_COMMON_DIR="${PROJECT_DIR}/test_common"
+readonly TEST_DIR="${PROJECT_DIR}/test_common"
 readonly TEMP_DIR="${PROJECT_DIR}/z_tmp"
 
 # MAX_ID_UTILS=1
-MAX_ID_JSON=6
-MAX_ID_LEX=2
-MAX_ID_PARSE=1
-MAX_ID_COMPILE=26
+MAX_ID_JSON=8
+MAX_ID_LEX=3
+MAX_ID_PARSE=2
+MAX_ID_COMPILE=27
 
 ERRS=""
 
@@ -105,7 +104,7 @@ get_ids() {
 #   #   return
 #   # fi
 # 
-#   # ruby ${TEST_COMMON_DIR}/diff.rb text $exp_file $temp_output_file
+#   # ruby ${TEST_DIR}/diff.rb text $exp_file $temp_output_file
 #   $CBC_CMD test/test_utils.sh
 #   if [ $? -ne 0 ]; then
 #     # meld $exp_file $temp_output_file &
@@ -140,8 +139,8 @@ test_json_nn() {
     return
   fi
 
-  # ruby ${TEST_COMMON_DIR}/diff.rb json $exp_file $temp_json_file
-  ruby ${TEST_COMMON_DIR}/diff.rb json-fmt $exp_file $temp_json_file
+  # ruby ${TEST_DIR}/diff.rb json $exp_file $temp_json_file
+  ruby ${TEST_DIR}/diff.rb json-fmt $exp_file $temp_json_file
   if [ $? -ne 0 ]; then
     # meld $exp_file $temp_json_file &
 
@@ -175,7 +174,7 @@ test_lex_nn() {
     return
   fi
 
-  ruby ${TEST_COMMON_DIR}/diff.rb text $exp_file $temp_tokens_file
+  ruby ${TEST_DIR}/diff.rb text $exp_file $temp_tokens_file
   if [ $? -ne 0 ]; then
     # meld $exp_file $temp_tokens_file &
 
@@ -219,7 +218,7 @@ test_parse_nn() {
     return
   fi
 
-  ruby ${TEST_COMMON_DIR}/diff.rb json-fmt $exp_file $temp_vgt_file
+  ruby ${TEST_DIR}/diff.rb json-fmt $exp_file $temp_vgt_file
   if [ $? -ne 0 ]; then
     # meld $exp_file $temp_vga_file &
 
@@ -296,7 +295,7 @@ test_compile_nn() {
   fi
 
   if [ "$local_errs" = "" ]; then
-    ruby ${TEST_COMMON_DIR}/diff.rb asm $exp_file $temp_vga_file
+    ruby ${TEST_DIR}/diff.rb asm $exp_file $temp_vga_file
     if [ $? -ne 0 ]; then
       # meld $exp_file $temp_vga_file &
 
