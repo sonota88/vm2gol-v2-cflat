@@ -477,7 +477,6 @@ void gen_func_def(NodeList* func_def) {
   NodeList* body;
   Names* lvar_names;
   NodeList* stmt;
-  NodeList* stmt_rest;
   NodeItem* var_name;
   int i;
 
@@ -499,15 +498,13 @@ void gen_func_def(NodeList* func_def) {
   for (i = 0; i < NodeList_len(body); i++) {
     stmt = body->items[i]->list;
 
-    stmt_rest = NodeList_rest(stmt);
-
     if (
       str_eq(
         NodeList_head(stmt)->str_val,
         "var"
       )
     ) {
-      var_name = NodeList_head(stmt_rest);
+      var_name = NodeList_get(stmt, 1);
       Names_add(lvar_names, var_name->str_val);
       gen_var(fn_arg_names, lvar_names, stmt);
     } else {
