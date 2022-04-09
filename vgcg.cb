@@ -297,9 +297,9 @@ void gen_return(
   Names* lvar_names,
   NodeList* stmt
 ) {
-  NodeItem* retval = NodeList_get(stmt, 1); // TODO rename => expr
+  NodeItem* expr = NodeList_get(stmt, 1);
 
-  gen_expr(fn_arg_names, lvar_names, retval);
+  gen_expr(fn_arg_names, lvar_names, expr);
 }
 
 void gen_while(
