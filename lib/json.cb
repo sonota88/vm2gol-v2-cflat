@@ -93,42 +93,64 @@ void print_indent(int lv) {
   }
 }
 
-void _print_as_json(NodeList* list, int lv) {
+void _print_as_json(NodeList* list, int lv, int pretty) {
   NodeItem* item;
   int i;
 
-  print_indent(lv);
-  printf("[\n");
+  if (pretty) {
+    print_indent(lv);
+  }
+  printf("[");
+  if (pretty) {
+    printf("\n");
+  }
   for (i = 0; i < NodeList_len(list); i++) {
     item = NodeList_get(list, i);
 
     if (item->kind == NODE_INT) {
-      print_indent(lv);
-      printf("  %d", item->int_val);
+      if (pretty) {
+        print_indent(lv);
+      }
+      printf("%d", item->int_val);
     } else if (item->kind == NODE_STR) {
-      print_indent(lv);
-      printf("  \"%s\"", item->str_val);
+      if (pretty) {
+        print_indent(lv);
+      }
+      printf("\"%s\"", item->str_val);
     } else if (item->kind == NODE_LIST) {
-      _print_as_json(item->list, lv + 1);
+      _print_as_json(item->list, lv + 1, pretty);
     } else {
       must_not_happen("Invalid node kind", __FILE__, __LINE__);
       exit(1);
     }
     if (i < NodeList_len(list) - 1) {
       printf(",");
+      if (!pretty) {
+        printf(" ");
+      }
     }
-    printf("\n");
+    if (pretty) {
+      printf("\n");
+    }
   }
   if (NodeList_len(list) == 0) {
-    printf("\n");
+    if (pretty) {
+      printf("\n");
+    }
   }
-  print_indent(lv);
+  if (pretty) {
+    print_indent(lv);
+  }
   printf("]");
 }
 
 void print_as_json(NodeList* list) {
-  _print_as_json(list, 0);
+  _print_as_json(list, 0, 1);
   printf("\n");
+}
+
+void print_as_json_oneline(NodeList* list) {
+  _print_as_json(list, 0, 0);
 }
 
 void list_to_json_line (char* dest, NodeList* list) {
