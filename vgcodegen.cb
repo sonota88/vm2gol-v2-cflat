@@ -308,13 +308,13 @@ void gen_while(
   NodeList* stmt
 ) {
   NodeItem* cond_expr;
-  NodeList* body;
+  NodeList* stmts;
   int label_id;
 
   puts_fn("-->> gen_while");
 
   cond_expr = NodeList_get(stmt, 1);
-  body = NodeList_get(stmt, 2)->list;
+  stmts = NodeList_get(stmt, 2)->list;
 
   label_id = get_label_id();
 
@@ -328,7 +328,7 @@ void gen_while(
 
   printf("  jump_eq end_while_%d\n", label_id);
 
-  gen_stmts(fn_arg_names, lvar_names, body);
+  gen_stmts(fn_arg_names, lvar_names, stmts);
 
   printf("  jump while_%d\n", label_id);
 
@@ -474,7 +474,7 @@ void gen_var(
 void gen_func_def(NodeList* func_def) {
   char* fn_name;
   Names* fn_arg_names;
-  NodeList* body;
+  NodeList* stmts;
   Names* lvar_names;
   NodeList* stmt;
   NodeItem* var_name;
@@ -484,7 +484,7 @@ void gen_func_def(NodeList* func_def) {
 
   fn_name = func_def->items[1]->str_val;
   fn_arg_names = Names_from_node_list(func_def->items[2]->list);
-  body = func_def->items[3]->list;
+  stmts = func_def->items[3]->list;
 
   printf("\n");
   printf("label %s\n", fn_name);
@@ -495,8 +495,8 @@ void gen_func_def(NodeList* func_def) {
 
   lvar_names = Names_new();
 
-  for (i = 0; i < NodeList_len(body); i++) {
-    stmt = body->items[i]->list;
+  for (i = 0; i < NodeList_len(stmts); i++) {
+    stmt = stmts->items[i]->list;
 
     if (
       str_eq(
