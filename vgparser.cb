@@ -74,8 +74,8 @@ void read_tokens(char* input) {
     substring(line, input, pos, pos + line_size);
 
     t = parse_json(line);
-    kind_str = NodeList_get(t, 0)->str_val;
-    str = NodeList_get(t, 1)->str_val;
+    kind_str = NodeList_get(t, 1)->str_val;
+    str = NodeList_get(t, 2)->str_val;
 
     g_tokens[ti] = Token_new(
       TokenKind_from_str(kind_str),
