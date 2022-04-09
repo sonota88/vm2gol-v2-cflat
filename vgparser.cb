@@ -515,14 +515,8 @@ NodeList* parse_while(void) {
 
 NodeList* parse_when_clause(void) {
   NodeList* list;
-  Token* t;
   NodeItem* expr;
   NodeList* stmts;
-
-  t = peek(0);
-  if (Token_is(t, TOKEN_SYM, "}")) {
-    return NULL;
-  }
 
   consume_sym("(");
   expr = parse_expr();
@@ -550,11 +544,11 @@ NodeList* parse_case(void) {
   when_clauses = NodeList_new();
 
   while (1) {
-    when_clause = parse_when_clause();
-    if (when_clause == NULL) {
+    if (Token_is(peek(0), TOKEN_SYM, "}")) {
       break;
     }
 
+    when_clause = parse_when_clause();
     NodeList_add_list(when_clauses, when_clause);
   }
 
