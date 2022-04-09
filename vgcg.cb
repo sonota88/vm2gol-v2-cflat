@@ -471,7 +471,7 @@ void gen_var(
   }
 }
 
-void gen_func_def(NodeList* rest) {
+void gen_func_def(NodeList* func_def) {
   char* fn_name;
   Names* fn_arg_names;
   NodeList* body;
@@ -483,9 +483,9 @@ void gen_func_def(NodeList* rest) {
 
   puts_fn("-->> gen_func_def");
 
-  fn_name = rest->items[0]->str_val;
-  fn_arg_names = Names_from_node_list(rest->items[1]->list);
-  body = rest->items[2]->list;
+  fn_name = func_def->items[1]->str_val;
+  fn_arg_names = Names_from_node_list(func_def->items[2]->list);
+  body = func_def->items[3]->list;
 
   printf("\n");
   printf("label %s\n", fn_name);
@@ -523,17 +523,17 @@ void gen_func_def(NodeList* rest) {
 void gen_top_stmts(NodeList* list) {
   NodeItem* item;
   NodeItem* stmt_head;
-  NodeList* stmt_rest;
+  NodeList* top_stmt;
   int i;
 
   for (i = 0; i < NodeList_len(list); i++) {
     item = list->items[i];
+    top_stmt = item->list;
 
     stmt_head = NodeList_head(item->list);
-    stmt_rest = NodeList_rest(item->list);
 
     if (str_eq(stmt_head->str_val, "func")) {
-      gen_func_def(stmt_rest);
+      gen_func_def(top_stmt);
     } else {
       not_yet_impl("gen_top_stmts", __LINE__);
     }
