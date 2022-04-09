@@ -1,6 +1,6 @@
-kw:func
-ident:main
-sym:(
-sym:)
-sym:{
-sym:}
+["kw", "func"]
+["ident", "main"]
+["sym", "("]
+["sym", ")"]
+["sym", "{"]
+["sym", "}"]

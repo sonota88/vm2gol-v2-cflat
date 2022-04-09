@@ -2,6 +2,8 @@
 
 import lib.common_import;
 import lib.utils;
+import lib.types;
+import lib.json;
 
 #define INPUT_SIZE 8192
 
@@ -103,7 +105,13 @@ int is_kw(char* str) {
 }
 
 void print_token(char* kind, char* val) {
-  printf("%s:%s\n", kind, val);
+  NodeList* token = NodeList_new();
+
+  NodeList_add_str(token, kind);
+  NodeList_add_str(token, val);
+
+  print_as_json_oneline(token);
+  printf("\n");
 }
 
 int main(void) {
