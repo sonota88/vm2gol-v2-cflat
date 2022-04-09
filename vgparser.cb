@@ -355,18 +355,7 @@ NodeItem* parse_expr(void) {
   expr = _parse_expr_factor();
 
   while (is_binary_op(peek(0))) {
-    if (str_eq(peek(0)->str, "+")) {
-      op = "+";
-    } else if (str_eq(peek(0)->str, "*")) {
-      op = "*";
-    } else if (str_eq(peek(0)->str, "==")) {
-      op = "==";
-    } else if (str_eq(peek(0)->str, "!=")) {
-      op = "!=";
-    } else {
-      not_yet_impl("Unsupported operator", __LINE__);
-    }
-
+    op = peek(0)->str;
     g_pos++;
 
     expr_r = _parse_expr_factor();
