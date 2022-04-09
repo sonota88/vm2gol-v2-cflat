@@ -304,9 +304,7 @@ void gen_while(
   printf("  compare\n");
 
   printf("  jump_eq end_while_%d\n", label_id);
-  printf("  jump true_%d\n", label_id);
 
-  printf("label true_%d\n", label_id);
   gen_stmts(fn_arg_names, lvar_names, body);
 
   printf("  jump while_%d\n", label_id);
