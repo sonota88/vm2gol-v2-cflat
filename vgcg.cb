@@ -415,23 +415,23 @@ void gen_stmt(
   Names* lvar_names,
   NodeList* stmt
 ) {
-  NodeItem* stmt_head = NodeList_head(stmt);
+  char* head = NodeList_head(stmt)->str_val;
 
-  if (str_eq(stmt_head->str_val, "set")) {
+  if (str_eq(head, "set")) {
     gen_set(fn_arg_names, lvar_names, stmt);
-  } else if (str_eq(stmt_head->str_val, "call")) {
+  } else if (str_eq(head, "call")) {
     gen_call(fn_arg_names, lvar_names, stmt);
-  } else if (str_eq(stmt_head->str_val, "call_set")) {
+  } else if (str_eq(head, "call_set")) {
     gen_call_set(fn_arg_names, lvar_names, stmt);
-  } else if (str_eq(stmt_head->str_val, "return")) {
+  } else if (str_eq(head, "return")) {
     gen_return(fn_arg_names, lvar_names, stmt);
-  } else if (str_eq(stmt_head->str_val, "while")) {
+  } else if (str_eq(head, "while")) {
     gen_while(fn_arg_names, lvar_names, stmt);
-  } else if (str_eq(stmt_head->str_val, "case")) {
+  } else if (str_eq(head, "case")) {
     gen_case(fn_arg_names, lvar_names, stmt);
-  } else if (str_eq(stmt_head->str_val, "_cmt")) {
+  } else if (str_eq(head, "_cmt")) {
     gen_vm_comment(NodeList_get(stmt, 1)->str_val);
-  } else if (str_eq(stmt_head->str_val, "_debug")) {
+  } else if (str_eq(head, "_debug")) {
     gen_debug();
   } else {
     not_yet_impl("gen_stmt", __LINE__);
@@ -519,7 +519,7 @@ void gen_func_def(NodeList* func_def) {
 
 void gen_top_stmts(NodeList* list) {
   NodeItem* item;
-  NodeItem* stmt_head;
+  char* head;
   NodeList* top_stmt;
   int i;
 
@@ -527,9 +527,9 @@ void gen_top_stmts(NodeList* list) {
     item = list->items[i];
     top_stmt = item->list;
 
-    stmt_head = NodeList_head(item->list);
+    head = NodeList_head(item->list)->str_val;
 
-    if (str_eq(stmt_head->str_val, "func")) {
+    if (str_eq(head, "func")) {
       gen_func_def(top_stmt);
     } else {
       not_yet_impl("gen_top_stmts", __LINE__);
