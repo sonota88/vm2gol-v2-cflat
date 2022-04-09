@@ -346,7 +346,7 @@ int is_binary_op(Token* t) {
 
 NodeItem* parse_expr(void) {
   NodeItem* expr;
-  NodeItem* expr_r;
+  NodeItem* factor;
   NodeList* list;
   char* op;
 
@@ -358,12 +358,12 @@ NodeItem* parse_expr(void) {
     op = peek(0)->str;
     g_pos++;
 
-    expr_r = _parse_expr_factor();
+    factor = _parse_expr_factor();
 
     list = NodeList_new();
     NodeList_add_str(list, op);
     NodeList_add_item(list, expr);
-    NodeList_add_item(list, expr_r);
+    NodeList_add_item(list, factor);
 
     expr = NodeItem_new_list(list);
   }
